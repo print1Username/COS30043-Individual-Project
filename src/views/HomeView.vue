@@ -18,8 +18,15 @@ import AppButton from '@/components/ui/AppButton.vue'
       </h3>
       <!-- Buttons -->
       <div class="home-actions">
-        <AppButton text="Login" to="/login" />
-        <AppButton text="Sign Up" to="/signup" variant="outlined" />
+        <AppButton
+          text="Login"
+          to="/login"
+          variant="elevated"
+          size="x-large"
+          rounded="md"
+          class="pa-3"
+        />
+        <AppButton text="Sign Up" to="/signup" variant="outlined" size="x-large" rounded="md" />
       </div>
     </div>
   </v-container>

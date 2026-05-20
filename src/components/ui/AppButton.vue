@@ -4,7 +4,12 @@ import { computed } from 'vue'
 const props = defineProps({
   text: {
     type: String,
-    default: 'Button',
+    default: '',
+  },
+
+  color: {
+    type: String,
+    default: null,
   },
 
   variant: {
@@ -16,9 +21,66 @@ const props = defineProps({
     },
   },
 
+  size: {
+    type: [String, Number],
+    default: null,
+
+    validator: (value) => {
+      if (value === null || typeof value === 'number') return true
+
+      return ['x-small', 'small', 'default', 'large', 'x-large'].includes(value)
+    },
+  },
+
+  density: {
+    type: String,
+    default: null,
+
+    validator: (value) => {
+      return [null, 'default', 'comfortable', 'compact'].includes(value)
+    },
+  },
+
+  rounded: {
+    type: [Boolean, String, Number],
+    default: null,
+
+    validator: (value) => {
+      if (value === null || typeof value === 'boolean' || typeof value === 'number') return true
+
+      return ['0', 'xs', 'sm', 'md', 'lg', 'xl', 'pill', 'circle', 'shaped'].includes(value)
+    },
+  },
+
+  block: {
+    type: Boolean,
+    default: false,
+  },
+
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+
   icon: {
     type: String,
     default: null,
+  },
+
+  iconColor: {
+    type: String,
+    default: null,
+  },
+
+  iconSize: {
+    type: [String, Number],
+    default: null,
+
+    validator: (value) => {
+      if (value === null || typeof value === 'number') return true
+
+      return ['x-small', 'small', 'default', 'large', 'x-large'].includes(value)
+    },
   },
 
   iconType: {
@@ -40,22 +102,21 @@ const buttonProps = computed(() => {
   switch (props.iconType) {
     case 'icon':
       return {
-        icon: props.icon,
+        icon: true,
       }
 
     case 'prepend':
       return {
-        prependIcon: props.icon,
+        prepend: true,
       }
 
     case 'append':
       return {
-        appendIcon: props.icon,
+        append: true,
       }
 
     case 'stacked':
       return {
-        prependIcon: props.icon,
         stacked: true,
       }
 
@@ -63,10 +124,50 @@ const buttonProps = computed(() => {
       return {}
   }
 })
+
+const iconProps = computed(() => ({
+  icon: props.icon,
+  color: props.iconColor,
+  size: props.iconSize,
+}))
 </script>
 
 <template>
-  <v-btn :variant="variant" v-bind="buttonProps" :to="to">
+  <v-btn
+    v-if="iconType === 'icon'"
+    :variant="variant"
+    :color="color"
+    :size="size"
+    :density="density"
+    :rounded="rounded"
+    :block="block"
+    :disabled="disabled"
+    v-bind="buttonProps"
+    :to="to"
+  >
+    <v-icon v-bind="iconProps" />
+  </v-btn>
+
+  <v-btn
+    v-else
+    :variant="variant"
+    :color="color"
+    :size="size"
+    :density="density"
+    :rounded="rounded"
+    :block="block"
+    :disabled="disabled"
+    v-bind="buttonProps"
+    :to="to"
+  >
+    <template v-if="icon && ['prepend', 'stacked'].includes(iconType)" #prepend>
+      <v-icon v-bind="iconProps" />
+    </template>
+
     {{ text }}
+
+    <template v-if="icon && iconType === 'append'" #append>
+      <v-icon v-bind="iconProps" />
+    </template>
   </v-btn>
 </template>
