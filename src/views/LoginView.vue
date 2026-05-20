@@ -5,6 +5,13 @@ import AppButton from '@/components/ui/AppButton.vue'
 <template>
   <div class="login">
     <h1>Login Page</h1>
-    <AppButton to="/" icon="mdi-arrow-left-drop-circle" icon-type="icon" variant="tonal" />
+    <AppButton
+      to="/"
+      icon="mdi-arrow-left-drop-circle"
+      icon-type="icon"
+      variant="tonal"
+      iconSize="default"
+      class="pa-3"
+    />
   </div>
 </template>
