@@ -16,9 +16,8 @@ import AppButton from './ui/AppButton.vue'
         This is a simple e-commerce website built with Vue.js. It demonstrates the use of Vue Router
         for navigation and component-based architecture for building a scalable application.
       </h3>
-
       <!-- Buttons -->
-      <div class="home-actions">
+      <div class="home-actions ma-5">
         <AppButton text="Login" to="/login" />
         <AppButton text="Sign Up" to="/signup" variant="outlined" />
       </div>
