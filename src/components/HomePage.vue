@@ -17,7 +17,7 @@ import AppButton from './ui/AppButton.vue'
         for navigation and component-based architecture for building a scalable application.
       </h3>
       <!-- Buttons -->
-      <div class="home-actions ma-5">
+      <div class="home-actions">
         <AppButton text="Login" to="/login" />
         <AppButton text="Sign Up" to="/signup" variant="outlined" />
       </div>
