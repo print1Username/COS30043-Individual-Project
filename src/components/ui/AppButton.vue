@@ -12,14 +12,7 @@ const props = defineProps({
     default: 'elevated',
 
     validator: (value) => {
-      return [
-        'outlined',
-        'tonal',
-        'text',
-        'plain',
-        'flat',
-        'elevated',
-      ].includes(value)
+      return ['outlined', 'tonal', 'text', 'plain', 'flat', 'elevated'].includes(value)
     },
   },
 
@@ -33,14 +26,13 @@ const props = defineProps({
     default: null,
 
     validator: (value) => {
-      return [
-        null,
-        'icon',
-        'prepend',
-        'append',
-        'stacked',
-      ].includes(value)
+      return [null, 'icon', 'prepend', 'append', 'stacked'].includes(value)
     },
+  },
+
+  link: {
+    type: String,
+    default: null,
   },
 })
 
@@ -74,10 +66,7 @@ const buttonProps = computed(() => {
 </script>
 
 <template>
-  <v-btn
-    :variant="variant"
-    v-bind="buttonProps"
-  >
+  <v-btn :variant="variant" v-bind="buttonProps" :to="link">
     {{ text }}
   </v-btn>
 </template>
