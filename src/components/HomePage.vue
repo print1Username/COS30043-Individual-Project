@@ -12,7 +12,7 @@ import AppButton from './ui/AppButton.vue'
       <h1 class="text-h3 font-weight-bold mb-4">Vue E-Commerce</h1>
 
       <!-- Description -->
-      <h3 class="text-subtitle-1 text-medium-emphasis mb-8">
+      <h3 class="text-subtitle-1 text-medium-emphasis mb-6">
         This is a simple e-commerce website built with Vue.js. It demonstrates the use of Vue Router
         for navigation and component-based architecture for building a scalable application.
       </h3>
