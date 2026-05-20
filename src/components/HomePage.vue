@@ -13,10 +13,7 @@ import AppButton from './ui/AppButton.vue'
   </div>
 
   <div>
-    <AppButton text="Default" />
-    <AppButton text="Outlined" variant="outlined" />
-    <AppButton text="Tonal" variant="tonal" />
-    <AppButton text="Text" variant="text" />
+    <AppButton text="Login" link="/login" />
   </div>
 </template>
 
