@@ -30,7 +30,7 @@ const props = defineProps({
     },
   },
 
-  link: {
+  to: {
     type: String,
     default: null,
   },
@@ -66,7 +66,7 @@ const buttonProps = computed(() => {
 </script>
 
 <template>
-  <v-btn :variant="variant" v-bind="buttonProps" :to="link">
+  <v-btn :variant="variant" v-bind="buttonProps" :to="to">
     {{ text }}
   </v-btn>
 </template>

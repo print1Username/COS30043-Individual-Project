@@ -3,41 +3,35 @@ import AppButton from './ui/AppButton.vue'
 </script>
 
 <template>
-  <div class="greetings">
-    <h1 class="green">Vue E-Commerce</h1>
-    <h3>
-      You've successfully created a project with
-      <a href="https://vite.dev/" target="_blank" rel="noopener">Vite</a> +
-      <a href="https://vuejs.org/" target="_blank" rel="noopener">Vue 3</a>.
-    </h3>
-  </div>
+  <v-container class="fill-height d-flex align-center justify-center">
+    <v-row align="center" justify="center">
+      <v-col cols="12" md="8" lg="6" class="text-center">
+        <!-- Logo -->
+        <img alt="Vue logo" class="logo mb-6" src="@/assets/logo.svg" width="125" height="125" />
 
-  <div>
-    <AppButton text="Login" link="/login" />
-  </div>
+        <!-- Title -->
+        <h1 class="text-h3 font-weight-bold mb-4">Vue E-Commerce</h1>
+
+        <!-- Description -->
+        <h3 class="text-subtitle-1 text-medium-emphasis mb-8">
+          This is a simple e-commerce website built with Vue.js. It demonstrates the use of Vue
+          Router for navigation and component-based architecture for building a scalable
+          application.
+        </h3>
+
+        <!-- Buttons -->
+        <div class="d-flex justify-center ga-4">
+          <AppButton text="Login" to="/login" />
+          <AppButton text="Sign Up" to="/signup" variant="outlined" />
+        </div>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <style scoped>
-h1 {
-  font-weight: 500;
-  font-size: 2.6rem;
-  position: relative;
-  top: -10px;
-}
-
-h3 {
-  font-size: 1.2rem;
-}
-
-.greetings h1,
-.greetings h3 {
-  text-align: center;
-}
-
-@media (min-width: 1024px) {
-  .greetings h1,
-  .greetings h3 {
-    text-align: left;
-  }
+.logo {
+  display: block;
+  margin-inline: auto;
 }
 </style>
