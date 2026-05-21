@@ -46,7 +46,7 @@ function hidePassword() {
 <template>
   <v-text-field
     v-model="model"
-    class="auth-input my-4"
+    class="auth-input my-4 mx-auto"
     :label="label"
     :type="inputType"
     :rules="rules"

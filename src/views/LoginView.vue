@@ -38,7 +38,7 @@ const emailRules = [
         revealable
       />
 
-      <p class="auth-forgot-password text-body-2 mt-2 mb-4">
+      <p class="auth-switch text-body-2 mt-2 mb-4 text-underline">
         <RouterLink to="/forgot">Forgot Password?</RouterLink>
       </p>
 
