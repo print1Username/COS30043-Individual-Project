@@ -41,3 +41,7 @@ __screenshots__/
 # Database
 *.env
 *.env.local
+
+# Markdown Files
+*.md
+!README.md
