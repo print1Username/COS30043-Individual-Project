@@ -4,6 +4,8 @@ import AppButton from '@/components/ui/AppButton.vue'
 import HomeButton from '@/components/ui/HomeButton.vue'
 import HomePageField from '@/components/ui/HomePageField.vue'
 
+import { handleSignUp } from '@/composables/auth'
+
 const username = ref('')
 const email = ref('')
 const password = ref('')
