@@ -1,5 +1,9 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, useAttrs } from 'vue'
+
+defineOptions({
+  inheritAttrs: false,
+})
 
 const props = defineProps({
   text: {
@@ -96,7 +100,14 @@ const props = defineProps({
     type: String,
     default: null,
   },
+
+  type: {
+    type: String,
+    default: 'button',
+  },
 })
+
+const attrs = useAttrs()
 
 const buttonProps = computed(() => {
   switch (props.iconType) {
@@ -125,6 +136,11 @@ const buttonProps = computed(() => {
   }
 })
 
+const vButtonProps = computed(() => ({
+  ...buttonProps.value,
+  ...attrs,
+}))
+
 const iconProps = computed(() => ({
   icon: props.icon,
   color: props.iconColor,
@@ -142,7 +158,8 @@ const iconProps = computed(() => ({
     :rounded="rounded"
     :block="block"
     :disabled="disabled"
-    v-bind="buttonProps"
+    :type="type"
+    v-bind="vButtonProps"
     :to="to"
   >
     <v-icon v-bind="iconProps" />
@@ -157,7 +174,8 @@ const iconProps = computed(() => ({
     :rounded="rounded"
     :block="block"
     :disabled="disabled"
-    v-bind="buttonProps"
+    :type="type"
+    v-bind="vButtonProps"
     :to="to"
   >
     <template v-if="icon && ['prepend', 'stacked'].includes(iconType)" #prepend>
