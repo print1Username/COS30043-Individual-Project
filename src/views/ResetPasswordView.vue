@@ -4,24 +4,16 @@ import { useRouter } from 'vue-router'
 import AppButton from '@/components/ui/AppButton.vue'
 import HomeButton from '@/components/ui/HomeButton.vue'
 import HomePageField from '@/components/ui/HomePageField.vue'
-
-import { handleSignUp } from '@/lib/auth'
+import { handleUpdatePassword } from '@/lib/auth'
 
 const router = useRouter()
 const form = ref(null)
-const username = ref('')
-const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
 
-const requiredRules = [(value) => !!value || 'This field is required']
-const emailRules = [
-  (value) => !!value || 'Email is required',
-  (value) => /.+@.+\..+/.test(value) || 'Please enter a valid email address',
-]
 const passwordRules = [
   (value) => !!value || 'Password is required',
   (value) => value.length >= 6 || 'Password must be at least 6 characters',
@@ -31,35 +23,29 @@ const confirmPasswordRules = [
   (value) => value === password.value || 'Passwords do not match',
 ]
 
-async function submitSignUp() {
+async function submitResetPassword() {
   errorMessage.value = ''
   successMessage.value = ''
 
   const result = await form.value?.validate()
 
   if (!result?.valid) {
-    console.info('[auth:failed] Sign up form validation failed')
+    console.info('[auth:failed] Reset password form validation failed')
     return
   }
 
   try {
     loading.value = true
 
-    const data = await handleSignUp({
-      username: username.value.trim(),
-      email: email.value.trim(),
+    await handleUpdatePassword({
       password: password.value,
-      redirectTo: `${window.location.origin}/dashboard`,
     })
 
-    if (data.session) {
-      await router.push('/dashboard')
-      return
-    }
-
-    successMessage.value = 'Sign up successful. Please check your email to confirm your account.'
+    successMessage.value = 'Password updated successfully. Redirecting to login.'
+    localStorage.removeItem('passwordResetRequested')
+    await router.push('/login')
   } catch (error) {
-    errorMessage.value = error.message || 'Unable to sign up. Please try again.'
+    errorMessage.value = error.message || 'Unable to update password. Please try again.'
   } finally {
     loading.value = false
   }
@@ -68,29 +54,14 @@ async function submitSignUp() {
 
 <template>
   <v-container fluid class="auth-page">
-    <v-form ref="form" class="auth-form" @submit.prevent="submitSignUp">
+    <v-form ref="form" class="auth-form" @submit.prevent="submitResetPassword">
       <HomeButton />
 
-      <h1 class="text-h3 font-weight-bold text-center mb-8">Sign Up</h1>
-
-      <HomePageField
-        v-model="username"
-        label="Username"
-        autocomplete="username"
-        :rules="requiredRules"
-      />
-
-      <HomePageField
-        v-model="email"
-        label="Email"
-        type="email"
-        autocomplete="email"
-        :rules="emailRules"
-      />
+      <h1 class="text-h3 font-weight-bold text-center mb-8">Reset Password</h1>
 
       <HomePageField
         v-model="password"
-        label="Password"
+        label="New Password"
         type="password"
         autocomplete="new-password"
         :rules="passwordRules"
@@ -99,7 +70,7 @@ async function submitSignUp() {
 
       <HomePageField
         v-model="confirmPassword"
-        label="Confirm Password"
+        label="Confirm New Password"
         type="password"
         autocomplete="new-password"
         :rules="confirmPasswordRules"
@@ -115,7 +86,7 @@ async function submitSignUp() {
       </v-alert>
 
       <AppButton
-        text="Sign Up"
+        text="Update Password"
         type="submit"
         color="primary"
         block
@@ -125,11 +96,6 @@ async function submitSignUp() {
         :loading="loading"
         :disabled="loading"
       />
-
-      <p class="auth-switch text-body-2 text-center mt-6">
-        Already have an account?
-        <RouterLink to="/login">Login</RouterLink>
-      </p>
     </v-form>
   </v-container>
 </template>
@@ -148,38 +114,11 @@ async function submitSignUp() {
   max-width: 460px;
 }
 
-.auth-input {
-  margin-bottom: 6px;
-}
-
-.auth-input :deep(.v-field__input) {
-  min-height: 62px;
-  padding: 18px 18px 10px;
-}
-
-.auth-input :deep(.v-field__append-inner) {
-  padding-top: 14px;
-}
-
 .auth-submit {
   min-height: 58px;
   padding-inline: 48px;
   font-size: 1.08rem;
   font-weight: 700;
   letter-spacing: 0;
-}
-
-.auth-switch {
-  color: rgb(var(--v-theme-on-surface-variant));
-}
-
-.auth-switch a {
-  color: rgb(var(--v-theme-primary));
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.auth-switch a:hover {
-  text-decoration: underline;
 }
 </style>
