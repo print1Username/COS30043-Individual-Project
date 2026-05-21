@@ -5,9 +5,7 @@ import HomeButton from '@/components/ui/HomeButton.vue'
 import HomePageField from '@/components/ui/HomePageField.vue'
 
 const email = ref('')
-const password = ref('')
 
-const requiredRules = [(value) => !!value || 'This field is required']
 const emailRules = [
   (value) => !!value || 'Email is required',
   (value) => /.+@.+\..+/.test(value) || 'Please enter a valid email address',
@@ -19,7 +17,7 @@ const emailRules = [
     <v-form class="auth-form" @submit.prevent>
       <HomeButton />
 
-      <h1 class="text-h3 font-weight-bold text-center mb-8">Login</h1>
+      <h1 class="text-h3 font-weight-bold text-center mb-8">Forgot Password</h1>
 
       <HomePageField
         v-model="email"
@@ -29,21 +27,12 @@ const emailRules = [
         :rules="emailRules"
       />
 
-      <HomePageField
-        v-model="password"
-        label="Password"
-        type="password"
-        autocomplete="new-password"
-        :rules="requiredRules"
-        revealable
-      />
-
       <p class="auth-forgot-password text-body-2 mt-2 mb-4">
-        <RouterLink to="/forgot">Forgot Password?</RouterLink>
+        <RouterLink to="/login">Back to Login</RouterLink>
       </p>
 
       <AppButton
-        text="Login"
+        text="Reset Password"
         type="submit"
         color="primary"
         block
