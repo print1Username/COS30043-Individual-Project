@@ -7,6 +7,7 @@ import HomePageField from '@/components/ui/HomePageField.vue'
 const email = ref('')
 const password = ref('')
 
+const requiredRules = [(value) => !!value || 'This field is required']
 const emailRules = [
   (value) => !!value || 'Email is required',
   (value) => /.+@.+\..+/.test(value) || 'Please enter a valid email address',

@@ -1,29 +1,34 @@
-import { supabase } from './supabase'
+import { supabase } from '@/lib/supabase'
 
-const email = ref('')
-
-const handleSignUp = async () => {
-  try {
-    loading.value = true
-
-    if (!username.value || !email.value || !password.value) {
-      throw new Error('Please fill in all fields')
-    }
-
-    const { data, error } = await supabase.auth.signUp({
-      email: email.value,
-      password: password.value,
-      options: {
-        data: {
-          username: username.value,
-        },
-      },
-    })
-
-    if (error) throw error
-
-    console.log('User created:', data)
-  } catch (error) {
-    console.error('Error signing up:', error.message)
+export async function handleSignUp({ username, email, password, redirectTo }) {
+  if (!username || !email || !password) {
+    throw new Error('Please fill in all fields')
   }
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: redirectTo,
+      data: {
+        username,
+      },
+    },
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+export async function getCurrentSession() {
+  const { data, error } = await supabase.auth.getSession()
+
+  if (error) {
+    throw error
+  }
+
+  return data.session
 }

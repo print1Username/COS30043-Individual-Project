@@ -1,30 +1,73 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import AppButton from '@/components/ui/AppButton.vue'
 import HomeButton from '@/components/ui/HomeButton.vue'
 import HomePageField from '@/components/ui/HomePageField.vue'
 
-import { handleSignUp } from '@/composables/auth'
+import { handleSignUp } from '@/lib/auth'
 
+const router = useRouter()
+const form = ref(null)
 const username = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+const loading = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
 
 const requiredRules = [(value) => !!value || 'This field is required']
 const emailRules = [
   (value) => !!value || 'Email is required',
   (value) => /.+@.+\..+/.test(value) || 'Please enter a valid email address',
 ]
+const passwordRules = [
+  (value) => !!value || 'Password is required',
+  (value) => value.length >= 6 || 'Password must be at least 6 characters',
+]
 const confirmPasswordRules = [
   (value) => !!value || 'Confirm password is required',
   (value) => value === password.value || 'Passwords do not match',
 ]
+
+async function submitSignUp() {
+  errorMessage.value = ''
+  successMessage.value = ''
+
+  const result = await form.value?.validate()
+
+  if (!result?.valid) {
+    return
+  }
+
+  try {
+    loading.value = true
+
+    const data = await handleSignUp({
+      username: username.value.trim(),
+      email: email.value.trim(),
+      password: password.value,
+      redirectTo: `${window.location.origin}/dashboard`,
+    })
+
+    if (data.session) {
+      await router.push('/dashboard')
+      return
+    }
+
+    successMessage.value = 'Sign up successful. Please check your email to confirm your account.'
+  } catch (error) {
+    errorMessage.value = error.message || 'Unable to sign up. Please try again.'
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
   <v-container fluid class="auth-page">
-    <v-form class="auth-form" @submit.prevent>
+    <v-form ref="form" class="auth-form" @submit.prevent="submitSignUp">
       <HomeButton />
 
       <h1 class="text-h3 font-weight-bold text-center mb-8">Sign Up</h1>
@@ -49,17 +92,26 @@ const confirmPasswordRules = [
         label="Password"
         type="password"
         autocomplete="new-password"
-        :rules="requiredRules"
+        :rules="passwordRules"
         revealable
       />
 
       <HomePageField
         v-model="confirmPassword"
         label="Confirm Password"
-        type="pasword"
+        type="password"
         autocomplete="new-password"
         :rules="confirmPasswordRules"
+        revealable
       />
+
+      <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">
+        {{ errorMessage }}
+      </v-alert>
+
+      <v-alert v-if="successMessage" type="success" variant="tonal" class="mb-4">
+        {{ successMessage }}
+      </v-alert>
 
       <AppButton
         text="Sign Up"
@@ -69,6 +121,8 @@ const confirmPasswordRules = [
         size="x-large"
         rounded="md"
         class="auth-submit"
+        :loading="loading"
+        :disabled="loading"
       />
 
       <p class="auth-switch text-body-2 text-center mt-6">
