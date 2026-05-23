@@ -6,6 +6,7 @@ import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/ResetPasswordView.vue'
 
 import DashboardView from '@/views/dashboard/DashboardView.vue'
+import ProfileView from '@/views/dashboard/ProfileView.vue'
 import { exchangeCodeForSession, getCurrentSession } from '@/lib/auth'
 
 function getPasswordResetRequest() {
@@ -52,6 +53,14 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: DashboardView,
+      meta: {
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/dashboard/profile',
+      name: 'profile',
+      component: ProfileView,
       meta: {
         requiresAuth: true,
       },
