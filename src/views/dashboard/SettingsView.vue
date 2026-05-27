@@ -5,10 +5,10 @@ import AppButton from '@/components/ui/AppButton.vue'
 <template>
   <v-container fluid class="dashboard-page">
     <section class="dashboard-content">
-      <p class="text-overline text-primary mb-2">Profile</p>
-      <h1 class="text-h3 font-weight-bold mb-4">My Profile</h1>
+      <p class="text-overline text-primary mb-2">Settings</p>
+      <h1 class="text-h3 font-weight-bold mb-4">Account Settings</h1>
       <p class="text-body-1 text-medium-emphasis mb-6">
-        View and edit your profile information here.
+        Manage your account preferences and settings.
       </p>
       <AppButton
         text="Back to Dashboard"

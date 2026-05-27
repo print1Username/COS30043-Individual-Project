@@ -156,3 +156,18 @@ export async function getCurrentSession() {
 
   return data.session
 }
+
+export async function handleLogout() {
+  logAuthEvent('started', 'Logging out user')
+
+  const { error } = await supabase.auth.signOut()
+
+  if (error) {
+    logAuthEvent('failed', 'Logout failed', { error: error.message })
+    throw error
+  }
+
+  logAuthEvent('success', 'User logged out successfully')
+
+  return true
+}

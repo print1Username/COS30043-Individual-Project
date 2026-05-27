@@ -7,6 +7,8 @@ import ResetPasswordView from '@/views/ResetPasswordView.vue'
 
 import DashboardView from '@/views/dashboard/DashboardView.vue'
 import ProfileView from '@/views/dashboard/ProfileView.vue'
+import OrdersView from '@/views/dashboard/OrdersView.vue'
+import SettingsView from '@/views/dashboard/SettingsView.vue'
 import { exchangeCodeForSession, getCurrentSession } from '@/lib/auth'
 
 function getPasswordResetRequest() {
@@ -65,10 +67,27 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
+    {
+      path: '/dashboard/orders',
+      name: 'orders',
+      component: OrdersView,
+      meta: {
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/dashboard/settings',
+      name: 'settings',
+      component: SettingsView,
+      meta: {
+        requiresAuth: true,
+      },
+    },
   ],
 })
 
 router.beforeEach(async (to) => {
+  // Preserve Supabase email redirect exchange first
   if (to.query.code) {
     await exchangeCodeForSession(window.location.href)
     return {
@@ -81,6 +100,7 @@ router.beforeEach(async (to) => {
     }
   }
 
+  // Preserve reset-request guard
   if (to.meta.requiresResetRequest) {
     const resetRequest = getPasswordResetRequest()
 
@@ -96,22 +116,38 @@ router.beforeEach(async (to) => {
     return true
   }
 
-  if (!to.meta.requiresAuth) {
-    return true
+  // Determine session state
+  let session = null
+  try {
+    session = await getCurrentSession()
+  } catch (err) {
+    session = null
   }
 
-  const session = await getCurrentSession()
+  // Define auth-only pages (login-related)
+  const authPages = ['/login', '/signup', '/forgot', '/reset']
 
   if (session) {
+    // If logged in and trying to access auth pages, redirect to dashboard
+    if (authPages.includes(to.path)) {
+      return { path: '/dashboard', replace: true }
+    }
+
+    // Allow all other pages (including `/` home)
     return true
   }
 
-  return {
-    path: '/login',
-    query: {
-      redirect: to.fullPath,
-    },
+  // No session: allow public pages (including home and auth pages),
+  // but block pages that explicitly require auth
+  if (to.meta && to.meta.requiresAuth) {
+    return {
+      path: '/login',
+      query: { redirect: to.fullPath },
+      replace: true,
+    }
   }
+
+  return true
 })
 
 export default router
