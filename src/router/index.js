@@ -9,6 +9,7 @@ import DashboardView from '@/views/dashboard/DashboardView.vue'
 import ProfileView from '@/views/dashboard/ProfileView.vue'
 import OrdersView from '@/views/dashboard/OrdersView.vue'
 import FollowerView from '@/views/dashboard/FollowerView.vue'
+import HistoryView from '@/views/dashboard/HistoryView.vue'
 import { exchangeCodeForSession, getCurrentSession } from '@/lib/auth'
 
 function getPasswordResetRequest() {
@@ -60,14 +61,6 @@ const router = createRouter({
       },
     },
     {
-      path: '/dashboard/profile',
-      name: 'profile',
-      component: ProfileView,
-      meta: {
-        requiresAuth: true,
-      },
-    },
-    {
       path: '/dashboard/orders',
       name: 'orders',
       component: OrdersView,
@@ -79,6 +72,22 @@ const router = createRouter({
       path: '/dashboard/followers',
       name: 'followers',
       component: FollowerView,
+      meta: {
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/dashboard/history',
+      name: 'history',
+      component: HistoryView,
+      meta: {
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/dashboard/profile',
+      name: 'profile',
+      component: ProfileView,
       meta: {
         requiresAuth: true,
       },

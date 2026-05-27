@@ -22,6 +22,11 @@ const navItems = [
     to: '/dashboard/followers',
   },
   {
+    label: 'History',
+    icon: 'mdi-history',
+    to: '/dashboard/history',
+  },
+  {
     label: 'Profile',
     icon: 'mdi-account-circle',
     to: '/dashboard/profile',
