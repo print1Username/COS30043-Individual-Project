@@ -8,12 +8,12 @@ const router = useRouter()
 const navItems = [
   {
     label: 'Dashboard',
-    icon: 'mdi-home-dashboard',
+    icon: 'mdi-view-dashboard',
     to: '/dashboard',
   },
   {
     label: 'Orders',
-    icon: 'mdi-package-multiple',
+    icon: 'mdi-package',
     to: '/dashboard/orders',
   },
   {
