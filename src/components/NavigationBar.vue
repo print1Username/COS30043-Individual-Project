@@ -17,9 +17,9 @@ const navItems = [
     to: '/dashboard/orders',
   },
   {
-    label: 'Settings',
-    icon: 'mdi-cog',
-    to: '/dashboard/settings',
+    label: 'Followers',
+    icon: 'mdi-account-group-outline',
+    to: '/dashboard/followers',
   },
   {
     label: 'Profile',

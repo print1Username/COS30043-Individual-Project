@@ -8,7 +8,7 @@ import ResetPasswordView from '@/views/ResetPasswordView.vue'
 import DashboardView from '@/views/dashboard/DashboardView.vue'
 import ProfileView from '@/views/dashboard/ProfileView.vue'
 import OrdersView from '@/views/dashboard/OrdersView.vue'
-import SettingsView from '@/views/dashboard/SettingsView.vue'
+import FollowerView from '@/views/dashboard/FollowerView.vue'
 import { exchangeCodeForSession, getCurrentSession } from '@/lib/auth'
 
 function getPasswordResetRequest() {
@@ -76,9 +76,9 @@ const router = createRouter({
       },
     },
     {
-      path: '/dashboard/settings',
-      name: 'settings',
-      component: SettingsView,
+      path: '/dashboard/followers',
+      name: 'followers',
+      component: FollowerView,
       meta: {
         requiresAuth: true,
       },
