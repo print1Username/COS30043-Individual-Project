@@ -5,9 +5,9 @@ import AppButton from '@/components/ui/AppButton.vue'
 <template>
   <v-container fluid class="dashboard-page">
     <section class="dashboard-content">
-      <p class="text-overline text-primary mb-2">Orders</p>
-      <h1 class="text-h3 font-weight-bold mb-4">My Orders</h1>
-      <p class="text-body-1 text-medium-emphasis mb-6">View and manage your orders here.</p>
+      <p class="text-overline text-primary mb-2">Trades</p>
+      <h1 class="text-h3 font-weight-bold mb-4">My Trades</h1>
+      <p class="text-body-1 text-medium-emphasis mb-6">View and manage your trades here.</p>
       <AppButton
         text="Back to Dashboard"
         to="/dashboard"

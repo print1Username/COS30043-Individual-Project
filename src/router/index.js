@@ -7,7 +7,8 @@ import ResetPasswordView from '@/views/ResetPasswordView.vue'
 
 import DashboardView from '@/views/dashboard/DashboardView.vue'
 import ProfileView from '@/views/dashboard/ProfileView.vue'
-import OrdersView from '@/views/dashboard/OrdersView.vue'
+import ProductsView from '@/views/dashboard/products/ProductsView.vue'
+import CreateProductView from '@/views/dashboard/products/CreateProductView.vue'
 import FollowerView from '@/views/dashboard/FollowerView.vue'
 import HistoryView from '@/views/dashboard/HistoryView.vue'
 import { exchangeCodeForSession, getCurrentSession } from '@/lib/auth'
@@ -61,9 +62,17 @@ const router = createRouter({
       },
     },
     {
-      path: '/dashboard/orders',
-      name: 'orders',
-      component: OrdersView,
+      path: '/dashboard/products',
+      name: 'products',
+      component: ProductsView,
+      meta: {
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/dashboard/products/create',
+      name: 'products-create',
+      component: CreateProductView,
       meta: {
         requiresAuth: true,
       },

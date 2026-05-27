@@ -12,9 +12,9 @@ const navItems = [
     to: '/dashboard',
   },
   {
-    label: 'Orders',
+    label: 'Products',
     icon: 'mdi-package',
-    to: '/dashboard/orders',
+    to: '/dashboard/products',
   },
   {
     label: 'Followers',
