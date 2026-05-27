@@ -1,11 +1,12 @@
 <script setup>
-import { ref } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppButton from '@/components/ui/AppButton.vue'
 import HomeButton from '@/components/ui/HomeButton.vue'
 import HomePageField from '@/components/ui/HomePageField.vue'
 
 import { handleSignUp } from '@/lib/auth'
+import { normalizeUsername } from '@/lib/profile'
 
 const router = useRouter()
 const form = ref(null)
@@ -16,6 +17,8 @@ const confirmPassword = ref('')
 const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+const usernameWarning = ref('')
+let usernameWarningTimer = null
 
 const requiredRules = [(value) => !!value || 'This field is required']
 const emailRules = [
@@ -30,6 +33,23 @@ const confirmPasswordRules = [
   (value) => !!value || 'Confirm password is required',
   (value) => value === password.value || 'Passwords do not match',
 ]
+
+watch(username, (value) => {
+  const normalized = normalizeUsername(value)
+  if (normalized === value) return
+
+  username.value = normalized
+  usernameWarning.value = 'Only lowercase letters, numbers, and _ are allowed for username.'
+
+  if (usernameWarningTimer) {
+    clearTimeout(usernameWarningTimer)
+  }
+
+  usernameWarningTimer = setTimeout(() => {
+    usernameWarning.value = ''
+    usernameWarningTimer = null
+  }, 10000)
+})
 
 async function submitSignUp() {
   errorMessage.value = ''
@@ -64,6 +84,12 @@ async function submitSignUp() {
     loading.value = false
   }
 }
+
+onBeforeUnmount(() => {
+  if (usernameWarningTimer) {
+    clearTimeout(usernameWarningTimer)
+  }
+})
 </script>
 
 <template>
@@ -79,6 +105,16 @@ async function submitSignUp() {
         autocomplete="username"
         :rules="requiredRules"
       />
+
+      <v-alert
+        v-if="usernameWarning"
+        type="warning"
+        variant="tonal"
+        density="compact"
+        class="mb-4"
+      >
+        {{ usernameWarning }}
+      </v-alert>
 
       <HomePageField
         v-model="email"
