@@ -281,18 +281,18 @@ onBeforeUnmount(() => {
       <v-col cols="12" md="8">
         <v-card class="profile-data-card pa-6 elevation-6">
           <ProfilePageField
+            label="Display Name"
+            :value="profile.display_name"
+            placeholder="Enter your display name"
+            @save="handleFieldSave('display_name', $event)"
+          />
+          <ProfilePageField
             label="Username"
             :value="profile.username"
             placeholder="Enter your username"
             :transform-fn="normalizeUsername"
             :warning-message="usernameWarning"
             @save="handleFieldSave('username', $event)"
-          />
-          <ProfilePageField
-            label="Display Name"
-            :value="profile.display_name"
-            placeholder="Enter your display name"
-            @save="handleFieldSave('display_name', $event)"
           />
           <ProfilePageField
             label="Bio"
