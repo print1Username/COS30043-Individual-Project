@@ -10,7 +10,7 @@ const handleLogoutClick = async () => {
   isLoggingOut.value = true
   try {
     await handleLogout()
-    router.push('/login')
+    router.push('/')
   } catch (error) {
     console.error('[logout] Error:', error)
     isLoggingOut.value = false
