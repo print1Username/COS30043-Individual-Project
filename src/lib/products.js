@@ -47,6 +47,22 @@ function getPublicProductImageUrl(path) {
   return data?.publicUrl || ''
 }
 
+async function getCurrentUserId() {
+  const { data, error } = await supabase.auth.getSession()
+
+  if (error) {
+    console.error('[products:session] getSession error', error)
+    throw error
+  }
+
+  const userId = data?.session?.user?.id
+  if (!userId) {
+    throw new Error('No authenticated user session found.')
+  }
+
+  return userId
+}
+
 function normalizeImagePath(product, path) {
   if (!path) return ''
   if (/^https?:\/\//i.test(path)) return path
@@ -105,17 +121,26 @@ async function getProductImageUrl(path) {
   return getPublicProductImageUrl(cleanPath)
 }
 
+async function getProductImageUrls(paths = []) {
+  return Promise.all(paths.map((path) => getProductImageUrl(path)))
+}
+
 export async function normalizeProduct(product) {
   const imagePaths = parseProductImages(product.product_image).map((path) =>
     normalizeImagePath(product, path),
   )
   const firstImagePath = imagePaths[0] || ''
   const folderImagePath = firstImagePath || (await getFirstImageFromProductFolder(product.id))
+  const fullImagePaths = folderImagePath
+    ? [folderImagePath, ...imagePaths.filter((path) => path && path !== folderImagePath)]
+    : imagePaths
+  const fullImageUrls = await getProductImageUrls(fullImagePaths)
 
   return {
     ...product,
-    image_paths: folderImagePath ? [folderImagePath, ...imagePaths.slice(1)] : imagePaths,
-    image_url: await getProductImageUrl(folderImagePath),
+    image_paths: fullImagePaths,
+    image_urls: fullImageUrls,
+    image_url: fullImageUrls[0] || '',
   }
 }
 
@@ -151,17 +176,8 @@ export async function createProduct(payload = {}, files = []) {
     payload.id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : null)
   if (!productId) throw new Error('Unable to generate product id')
 
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-  if (sessionError) {
-    console.error('[products:create] getSession error', sessionError)
-    throw sessionError
-  }
-
-  const userId = sessionData?.session?.user?.id
+  const userId = await getCurrentUserId()
   console.info('[products:create] current user id', userId)
-  if (!userId) {
-    throw new Error('No authenticated user session found.')
-  }
 
   // Insert row first, before uploading images
   const row = {
@@ -241,7 +257,80 @@ export async function getProducts({ page = 1, perPage = 10 } = {}) {
 }
 
 export async function getProductById(id) {
-  const { data, error } = await supabase.from('products').select('*').eq('id', id).single()
+  const userId = await getCurrentUserId()
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', userId)
+    .single()
   if (error) throw error
   return normalizeProduct(data)
+}
+
+export async function updateProduct({
+  id,
+  payload = {},
+  existingImagePaths = [],
+  newFiles = [],
+  deletedImagePaths = [],
+} = {}) {
+  if (!id) throw new Error('Product id is required.')
+
+  const userId = await getCurrentUserId()
+  const keptPaths = existingImagePaths.map(removeBucketPrefix).filter(Boolean).slice(0, 10)
+  const uploadSlots = Math.max(10 - keptPaths.length, 0)
+  const filesToUpload = (newFiles || []).slice(0, uploadSlots)
+  let uploadedPaths = []
+  let productRowSaved = false
+
+  try {
+    uploadedPaths = await uploadImages(userId, id, filesToUpload)
+    const nextImagePaths = [...keptPaths, ...uploadedPaths].slice(0, 10)
+
+    const row = {
+      name: payload.name || 'Name',
+      descriptions: payload.descriptions || null,
+      value: payload.value != null ? Number(payload.value) : 1,
+      price: payload.price != null ? Number(Number(payload.price).toFixed(2)) : 1,
+      type: payload.type || null,
+      product_image: nextImagePaths.length ? JSON.stringify(nextImagePaths) : null,
+      update_at: new Date().toISOString(),
+    }
+
+    const { data, error } = await supabase
+      .from('products')
+      .update(row)
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('[products:update] update error', error)
+      throw error
+    }
+    productRowSaved = true
+
+    const removablePaths = deletedImagePaths
+      .map(removeBucketPrefix)
+      .filter((path) => path && !/^https?:\/\//i.test(path))
+
+    if (removablePaths.length) {
+      const { error: removeError } = await supabase.storage.from('products').remove(removablePaths)
+
+      if (removeError) {
+        console.error('[products:update] remove images error', removeError)
+        throw removeError
+      }
+    }
+
+    return normalizeProduct(data)
+  } catch (error) {
+    if (uploadedPaths.length && !productRowSaved) {
+      await supabase.storage.from('products').remove(uploadedPaths)
+    }
+
+    throw error
+  }
 }

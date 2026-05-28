@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   products: {
@@ -19,6 +20,7 @@ const props = defineProps({
 
 const isGrid = computed(() => props.mode === 'grid')
 const failedImageIds = ref(new Set())
+const router = useRouter()
 
 function formatPrice(value) {
   const amount = Number(value || 0)
@@ -41,6 +43,10 @@ function hasDisplayImage(product) {
 
 function onImageError(product) {
   failedImageIds.value = new Set([...failedImageIds.value, product.id])
+}
+
+function openProduct(product) {
+  router.push(`/dashboard/products/${product.id}`)
 }
 </script>
 
@@ -66,7 +72,16 @@ function onImageError(product) {
     </v-alert>
 
     <div v-else :class="isGrid ? 'products-grid' : 'products-list'">
-      <article v-for="product in products" :key="product.id" class="product-card">
+      <article
+        v-for="product in products"
+        :key="product.id"
+        class="product-card"
+        role="button"
+        tabindex="0"
+        @click="openProduct(product)"
+        @keydown.enter.prevent="openProduct(product)"
+        @keydown.space.prevent="openProduct(product)"
+      >
         <div :class="isGrid ? 'product-image product-image-grid' : 'product-image'">
           <v-img
             v-if="hasDisplayImage(product)"
@@ -130,6 +145,19 @@ function onImageError(product) {
   border-radius: 8px;
   background: #0d1511;
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.product-card:hover,
+.product-card:focus-visible {
+  border-color: rgba(66, 184, 131, 0.55);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.34);
+  transform: translateY(-2px);
+  outline: none;
 }
 
 .products-grid .product-card {
