@@ -62,10 +62,14 @@ CREATE POLICY "Delete own products"
   USING (user_id = auth.uid());
 
 -- Storage bucket and policies for product images.
--- Uploaded paths are stored as: {user_id}/{product_id}/{timestamp}_{index}_{filename}
+-- Uploaded paths are stored as: {product_id}/{timestamp}_{index}_{filename}
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('products', 'products', true)
 ON CONFLICT (id) DO NOTHING;
+
+UPDATE storage.buckets
+SET public = true
+WHERE id = 'products';
 
 DROP POLICY IF EXISTS "Insert own product images" ON storage.objects;
 DROP POLICY IF EXISTS "Select own product images" ON storage.objects;
@@ -78,7 +82,15 @@ CREATE POLICY "Insert own product images"
   TO authenticated
   WITH CHECK (
     bucket_id = 'products'
-    AND (storage.foldername(name))[1] = (auth.uid())::text
+    AND EXISTS (
+      SELECT 1
+      FROM public.products
+      WHERE products.id::text IN (
+          (storage.foldername(name))[1],
+          (storage.foldername(name))[2]
+        )
+        AND products.user_id = auth.uid()
+    )
   );
 
 CREATE POLICY "Select own product images"
@@ -87,7 +99,15 @@ CREATE POLICY "Select own product images"
   TO authenticated
   USING (
     bucket_id = 'products'
-    AND (storage.foldername(name))[1] = (auth.uid())::text
+    AND EXISTS (
+      SELECT 1
+      FROM public.products
+      WHERE products.id::text IN (
+          (storage.foldername(name))[1],
+          (storage.foldername(name))[2]
+        )
+        AND products.user_id = auth.uid()
+    )
   );
 
 CREATE POLICY "Update own product images"
@@ -96,11 +116,27 @@ CREATE POLICY "Update own product images"
   TO authenticated
   USING (
     bucket_id = 'products'
-    AND (storage.foldername(name))[1] = (auth.uid())::text
+    AND EXISTS (
+      SELECT 1
+      FROM public.products
+      WHERE products.id::text IN (
+          (storage.foldername(name))[1],
+          (storage.foldername(name))[2]
+        )
+        AND products.user_id = auth.uid()
+    )
   )
   WITH CHECK (
     bucket_id = 'products'
-    AND (storage.foldername(name))[1] = (auth.uid())::text
+    AND EXISTS (
+      SELECT 1
+      FROM public.products
+      WHERE products.id::text IN (
+          (storage.foldername(name))[1],
+          (storage.foldername(name))[2]
+        )
+        AND products.user_id = auth.uid()
+    )
   );
 
 CREATE POLICY "Delete own product images"
@@ -109,5 +145,13 @@ CREATE POLICY "Delete own product images"
   TO authenticated
   USING (
     bucket_id = 'products'
-    AND (storage.foldername(name))[1] = (auth.uid())::text
+    AND EXISTS (
+      SELECT 1
+      FROM public.products
+      WHERE products.id::text IN (
+          (storage.foldername(name))[1],
+          (storage.foldername(name))[2]
+        )
+        AND products.user_id = auth.uid()
+    )
   );
