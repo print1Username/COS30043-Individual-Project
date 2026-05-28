@@ -59,7 +59,7 @@ function onImageError(product) {
       v-else-if="products.length === 0"
       type="info"
       variant="tonal"
-      color="primary"
+      color="warning"
       class="empty-state"
     >
       No products found. Create your first product to start building your catalogue.
