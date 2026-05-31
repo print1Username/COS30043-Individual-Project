@@ -52,7 +52,7 @@ import RecentOtherProducts from '@/components/RecentOtherProducts.vue'
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .left-col {
