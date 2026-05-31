@@ -17,11 +17,6 @@ const navItems = [
     to: '/dashboard/products',
   },
   {
-    label: 'Followers',
-    icon: 'mdi-account-group-outline',
-    to: '/dashboard/followers',
-  },
-  {
     label: 'History',
     icon: 'mdi-history',
     to: '/dashboard/history',

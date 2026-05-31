@@ -33,7 +33,6 @@ const vuetify = createVuetify({
           success: '#42b883',
           warning: '#ffc857',
 
-          // ⭐ 加这个
           'on-background': '#ffffff',
           'on-surface': '#e5e7eb',
           'on-surface-variant': '#a7b0aa',
