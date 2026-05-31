@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import AppButton from '@/components/ui/AppButton.vue'
+import HistoryItemCard from '@/components/ui/HistoryItemCard.vue'
 import Pagination from '@/components/ui/Pagination.vue'
 import { getHistory } from '@/lib/history'
 
@@ -9,7 +10,8 @@ const loading = ref(false)
 const errorMessage = ref('')
 const page = ref(1)
 const totalItems = ref(0)
-const perPage = 30
+const perPage = 20
+const expandedHistoryId = ref(null)
 
 const totalPages = computed(() => Math.max(Math.ceil(totalItems.value / perPage), 1))
 
@@ -20,73 +22,6 @@ const resultSummary = computed(() => {
   const end = Math.min(page.value * perPage, totalItems.value)
   return `Showing ${start}-${end} of ${totalItems.value} records`
 })
-
-// Configuration mapping for history types to icons, colors, and text descriptions
-const typeConfig = {
-  add: {
-    icon: 'mdi-plus-circle-outline',
-    color: '#42b883', // Vue Green
-    title: 'Product Created',
-    description: 'A new product has been successfully added to your inventory.',
-  },
-  modify: {
-    icon: 'mdi-pencil-outline',
-    color: '#ffb01f', // Amber/Yellow
-    title: 'Product Modified',
-    description: 'Product details have been updated and synchronized.',
-  },
-  success: {
-    icon: 'mdi-check-circle-outline',
-    color: '#4caf50', // Success Green
-    title: 'Operation Completed',
-    description: 'Inventory operation was successfully executed.',
-  },
-  delete: {
-    icon: 'mdi-delete-outline',
-    color: '#ff5252', // Red
-    title: 'Product Deleted',
-    description: 'A product has been removed from your inventory.',
-  },
-}
-
-function getTypeDetails(type) {
-  return (
-    typeConfig[type] || {
-      icon: 'mdi-clock-outline',
-      color: '#9fb3a7',
-      title: 'Activity Logged',
-      description: 'Inventory system logged an activity.',
-    }
-  )
-}
-
-function formatTime(isoString) {
-  if (!isoString) return ''
-  try {
-    const date = new Date(isoString)
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true,
-    })
-  } catch (error) {
-    return isoString
-  }
-}
-
-function formatDate(isoString) {
-  if (!isoString) return ''
-  try {
-    const date = new Date(isoString)
-    const day = date.getDate()
-    const month = date.toLocaleDateString('en-US', { month: 'long' })
-    const year = date.getFullYear()
-    return `${day} ${month} ${year}`
-  } catch (error) {
-    return isoString
-  }
-}
 
 async function loadHistory() {
   loading.value = true
@@ -104,14 +39,23 @@ async function loadHistory() {
     if (page.value > totalPages.value) {
       page.value = totalPages.value
     }
+
+    if (!historyItems.value.some((item) => item.id === expandedHistoryId.value)) {
+      expandedHistoryId.value = null
+    }
   } catch (error) {
     console.error('[history:list]', error)
     errorMessage.value = error?.message || 'Unable to load history records.'
     historyItems.value = []
     totalItems.value = 0
+    expandedHistoryId.value = null
   } finally {
     loading.value = false
   }
+}
+
+function toggleHistoryItem(itemId) {
+  expandedHistoryId.value = expandedHistoryId.value === itemId ? null : itemId
 }
 
 watch(page, () => {
@@ -151,7 +95,6 @@ onMounted(() => {
       </div>
 
       <template v-else>
-        <!-- Empty State -->
         <div v-if="historyItems.length === 0" class="empty-state">
           <v-icon icon="mdi-history" size="80" color="#35495e" class="mb-4" />
           <h3 class="text-h5 font-weight-bold mb-2">No History Logged Yet</h3>
@@ -170,48 +113,16 @@ onMounted(() => {
           />
         </div>
 
-        <!-- History List -->
         <div v-else class="history-list">
-          <div
+          <HistoryItemCard
             v-for="item in historyItems"
             :key="item.id"
-            class="history-item"
-            :style="{ borderLeftColor: getTypeDetails(item.history_type).color }"
-          >
-            <div class="item-icon-container">
-              <v-icon
-                :icon="getTypeDetails(item.history_type).icon"
-                :color="getTypeDetails(item.history_type).color"
-                size="large"
-              />
-            </div>
-            <div class="item-content">
-              <div class="item-header">
-                <span
-                  class="item-title"
-                  :style="{ color: getTypeDetails(item.history_type).color }"
-                >
-                  {{ getTypeDetails(item.history_type).title }}
-                </span>
-                <span class="item-time">
-                  <v-icon icon="mdi-clock-outline" size="x-small" class="mr-1" />
-                  {{ formatTime(item.created_at) }}
-                </span>
-              </div>
-              <p class="item-description">
-                {{ getTypeDetails(item.history_type).description }}
-              </p>
-              <div class="item-meta-details">
-                <span class="meta-badge">
-                  <v-icon icon="mdi-calendar-range" size="x-small" class="mr-1" />
-                  {{ formatDate(item.created_at) }}
-                </span>
-              </div>
-            </div>
-          </div>
+            :item="item"
+            :expanded="expandedHistoryId === item.id"
+            @toggle="toggleHistoryItem(item.id)"
+          />
         </div>
 
-        <!-- Pagination -->
         <Pagination
           v-if="totalItems > perPage"
           v-model="page"
@@ -274,76 +185,6 @@ onMounted(() => {
   gap: 16px;
 }
 
-.history-item {
-  background-color: #0c130f;
-  border: 1px solid rgba(66, 184, 131, 0.1);
-  border-left-width: 5px;
-  border-radius: 8px;
-  padding: 18px 24px;
-  display: flex;
-  gap: 18px;
-  transition: all 0.2s ease-in-out;
-}
-
-.history-item:hover {
-  transform: translateX(4px);
-  background-color: #121c16;
-  border-color: rgba(66, 184, 131, 0.2);
-}
-
-.item-icon-container {
-  display: flex;
-  align-items: flex-start;
-  padding-top: 2px;
-}
-
-.item-content {
-  flex: 1;
-}
-
-.item-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.item-title {
-  font-weight: 700;
-  font-size: 16px;
-  letter-spacing: 0.5px;
-}
-
-.item-time {
-  font-size: 13px;
-  color: #8da194;
-  display: flex;
-  align-items: center;
-}
-
-.item-description {
-  font-size: 14px;
-  color: #bdc9c0;
-  margin-bottom: 8px;
-  line-height: 1.4;
-}
-
-.item-meta-details {
-  display: flex;
-  gap: 8px;
-  font-size: 11px;
-}
-
-.meta-badge {
-  background: rgba(255, 255, 255, 0.05);
-  color: #8da194;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-family: monospace;
-}
-
 .empty-state {
   text-align: center;
   padding: 60px 24px;
@@ -361,22 +202,6 @@ onMounted(() => {
   .history-meta {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .history-item {
-    padding: 16px;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .item-icon-container {
-    padding-top: 0;
-  }
-
-  .item-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
   }
 }
 </style>

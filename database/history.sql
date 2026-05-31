@@ -7,14 +7,18 @@ BEGIN
 END
 $$;
 
--- Create table IF NOT EXISTS
+-- Create table if it does not exist
 CREATE TABLE IF NOT EXISTS public.history (
   id uuid not null default gen_random_uuid (),
   user_id uuid not null default auth.uid (),
+  name text null,
   history_type public.history_type not null default 'add'::history_type,
   created_at timestamp with time zone not null default now(),
   constraint history_pkey primary key (id)
 ) TABLESPACE pg_default;
+
+ALTER TABLE public.history
+ADD COLUMN IF NOT EXISTS name text;
 
 -- Enable Row Level Security (RLS) on history
 ALTER TABLE public.history ENABLE ROW LEVEL SECURITY;
@@ -45,18 +49,19 @@ CREATE OR REPLACE FUNCTION public.sync_product_to_history()
 RETURNS TRIGGER AS $$
 BEGIN
   IF (TG_OP = 'INSERT') THEN
-    INSERT INTO public.history (user_id, history_type)
-    VALUES (NEW.user_id, 'add');
+    INSERT INTO public.history (user_id, name, history_type)
+    VALUES (NEW.user_id, NEW.name, 'add');
     RETURN NEW;
   ELSIF (TG_OP = 'UPDATE') THEN
-    INSERT INTO public.history (user_id, history_type)
-    VALUES (NEW.user_id, 'modify');
+    INSERT INTO public.history (user_id, name, history_type)
+    VALUES (NEW.user_id, NEW.name, 'modify');
     RETURN NEW;
   ELSIF (TG_OP = 'DELETE') THEN
-    INSERT INTO public.history (user_id, history_type)
-    VALUES (OLD.user_id, 'delete');
+    INSERT INTO public.history (user_id, name, history_type)
+    VALUES (OLD.user_id, OLD.name, 'delete');
     RETURN OLD;
   END IF;
+
   RETURN NULL;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
