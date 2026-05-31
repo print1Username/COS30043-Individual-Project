@@ -6,7 +6,9 @@ import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/ResetPasswordView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 
-import DashboardView from '@/views/dashboard/DashboardView.vue'
+import SearchPageView from '@/views/dashboard/SearchPageView.vue'
+
+import DashboardView from '@/views/dashboard/HomeView.vue'
 import ProfileView from '@/views/dashboard/ProfileView.vue'
 import ProductsView from '@/views/dashboard/products/ProductsView.vue'
 import CreateProductView from '@/views/dashboard/products/CreateProductView.vue'
@@ -98,6 +100,14 @@ const router = createRouter({
       path: '/dashboard/profile',
       name: 'profile',
       component: ProfileView,
+      meta: {
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/dashboard/search',
+      name: 'search',
+      component: SearchPageView,
       meta: {
         requiresAuth: true,
       },

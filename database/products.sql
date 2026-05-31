@@ -1,5 +1,5 @@
-create table public.products (
-  id uuid not null default gen_random_uuid (),
+CREATE TABLE IF NOT EXISTS public.products (
+  id uuid NOT NULL default gen_random_uuid (),
   user_id uuid not null default auth.uid (),
   name text not null default 'Name'::text,
   descriptions text null,
@@ -33,6 +33,7 @@ ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Insert own products" ON public.products;
 DROP POLICY IF EXISTS "Select own products" ON public.products;
+DROP POLICY IF EXISTS "Select all products" ON public.products;
 DROP POLICY IF EXISTS "Update own products" ON public.products;
 DROP POLICY IF EXISTS "Delete own products" ON public.products;
 
@@ -42,11 +43,13 @@ CREATE POLICY "Insert own products"
   TO authenticated
   WITH CHECK (user_id = auth.uid());
 
-CREATE POLICY "Select own products"
+-- Allow any authenticated user to SELECT any product row.
+-- This enables cross-user search. Write operations remain owner-only.
+CREATE POLICY "Select all products"
   ON public.products
   FOR SELECT
   TO authenticated
-  USING (user_id = auth.uid());
+  USING (true);
 
 CREATE POLICY "Update own products"
   ON public.products

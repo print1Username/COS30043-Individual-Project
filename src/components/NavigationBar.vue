@@ -1,9 +1,11 @@
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppButton from '@/components/ui/AppButton.vue'
 import LogoutButton from '@/components/ui/LogoutButton.vue'
 
 const router = useRouter()
+const searchQuery = ref('')
 
 const navItems = [
   {
@@ -31,6 +33,13 @@ const navItems = [
 const isActive = (path) => {
   return router.currentRoute.value.path === path
 }
+
+function submitSearch() {
+  const q = searchQuery.value.trim()
+  if (!q) return
+  router.push({ path: '/dashboard/search', query: { q } })
+  searchQuery.value = ''
+}
 </script>
 
 <template>
@@ -41,8 +50,21 @@ const isActive = (path) => {
       <span class="brand-text">Vue JS</span>
     </div>
 
-    <!-- Spacer -->
-    <v-spacer />
+    <!-- Search Box (fills remaining space) -->
+    <div class="navbar-search">
+      <v-text-field
+        v-model="searchQuery"
+        placeholder="Search products..."
+        variant="outlined"
+        density="compact"
+        color="primary"
+        hide-details
+        single-line
+        class="search-input"
+        prepend-inner-icon="mdi-magnify"
+        @keydown.enter="submitSearch"
+      />
+    </div>
 
     <!-- Navigation Items -->
     <div class="navbar-items">
@@ -80,9 +102,10 @@ const isActive = (path) => {
   font-size: 18px;
   color: #42b883;
   text-decoration: none;
-  margin-right: 32px;
+  margin-right: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .navbar-brand:hover {
@@ -91,6 +114,21 @@ const isActive = (path) => {
 
 .brand-text {
   letter-spacing: 1px;
+}
+
+.navbar-search {
+  flex: 1;
+  min-width: 0;
+  margin: 0 16px;
+}
+
+.search-input :deep(.v-field__outline) {
+  --v-field-border-opacity: 0.3;
+}
+
+.search-input :deep(.v-field) {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
 }
 
 .navbar-items {
@@ -112,14 +150,8 @@ const isActive = (path) => {
   transform: translateY(-2px);
 }
 
-.logout-btn {
-  margin-left: 8px;
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
-  padding-left: 16px;
-}
-
 /* Responsive Design */
-@media (max-width: 960px) {
+@media (max-width: 1100px) {
   .navbar-items {
     gap: 4px;
   }
@@ -129,7 +161,13 @@ const isActive = (path) => {
   }
 
   .navbar-brand {
-    margin-right: 16px;
+    margin-right: 12px;
+  }
+}
+
+@media (max-width: 820px) {
+  .navbar-search {
+    margin: 0 8px;
   }
 }
 
