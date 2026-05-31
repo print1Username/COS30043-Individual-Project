@@ -4,6 +4,7 @@ import LoginView from '@/views/LoginView.vue'
 import SignUpView from '@/views/SignUpView.vue'
 import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/ResetPasswordView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 
 import DashboardView from '@/views/dashboard/DashboardView.vue'
 import ProfileView from '@/views/dashboard/ProfileView.vue'
@@ -100,6 +101,11 @@ const router = createRouter({
       meta: {
         requiresAuth: true,
       },
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: NotFoundView,
     },
   ],
 })
