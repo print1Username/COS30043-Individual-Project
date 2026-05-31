@@ -10,7 +10,7 @@ const loading = ref(false)
 const errorMessage = ref('')
 const page = ref(1)
 const totalItems = ref(0)
-const perPage = 20
+const perPage = 10
 const expandedHistoryId = ref(null)
 
 const totalPages = computed(() => Math.max(Math.ceil(totalItems.value / perPage), 1))
