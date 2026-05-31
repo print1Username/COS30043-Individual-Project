@@ -1,18 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomePage from '@/views/HomeView.vue'
+import HomePage from '@/views/DashboardView.vue'
 import LoginView from '@/views/LoginView.vue'
 import SignUpView from '@/views/SignUpView.vue'
 import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/ResetPasswordView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
-import SearchPageView from '@/views/home/SearchPageView.vue'
+import SearchPageView from '@/views/dashboard/SearchPageView.vue'
 
-import HomeView from '@/views/home/HomeView.vue'
-import ProfileView from '@/views/home/ProfileView.vue'
-import ProductsView from '@/views/home/products/ProductsView.vue'
-import CreateProductView from '@/views/home/products/CreateProductView.vue'
-import ProductsDetailsView from '@/views/home/products/ProductsDetailsView.vue'
-import HistoryView from '@/views/home/HistoryView.vue'
+import DashboardView from '@/views/dashboard/DashboardView.vue'
+import ProfileView from '@/views/dashboard/ProfileView.vue'
+import ProductsView from '@/views/dashboard/products/ProductsView.vue'
+import CreateProductView from '@/views/dashboard/products/CreateProductView.vue'
+import ProductsDetailsView from '@/views/dashboard/products/ProductsDetailsView.vue'
+import HistoryView from '@/views/dashboard/HistoryView.vue'
 import { exchangeCodeForSession, getCurrentSession } from '@/lib/auth'
 
 function getPasswordResetRequest() {
@@ -56,43 +56,43 @@ const router = createRouter({
       },
     },
     {
-      path: '/home',
-      name: 'home',
-      component: HomeView,
+      path: '/dashboard',
+      name: 'dashboard',
+      component: DashboardView,
       meta: { requiresAuth: true },
     },
     {
-      path: '/home/products',
+      path: '/dashboard/products',
       name: 'products',
       component: ProductsView,
       meta: { requiresAuth: true },
     },
     {
-      path: '/home/products/create',
+      path: '/dashboard/products/create',
       name: 'products-create',
       component: CreateProductView,
       meta: { requiresAuth: true },
     },
     {
-      path: '/home/products/:id',
+      path: '/dashboard/products/:id',
       name: 'products-details',
       component: ProductsDetailsView,
       meta: { requiresAuth: true },
     },
     {
-      path: '/home/history',
+      path: '/dashboard/history',
       name: 'history',
       component: HistoryView,
       meta: { requiresAuth: true },
     },
     {
-      path: '/home/profile',
+      path: '/dashboard/profile',
       name: 'profile',
       component: ProfileView,
       meta: { requiresAuth: true },
     },
     {
-      path: '/home/search',
+      path: '/dashboard/search',
       name: 'search',
       component: SearchPageView,
       meta: { requiresAuth: true },
@@ -139,7 +139,7 @@ router.beforeEach(async (to) => {
 
   if (session) {
     if (authPages.includes(to.path)) {
-      return { path: '/home', replace: true }
+      return { path: '/dashboard', replace: true }
     }
     return true
   }
