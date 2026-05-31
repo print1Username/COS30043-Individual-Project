@@ -77,10 +77,7 @@ function isImageFile(file) {
   const name = file?.name || ''
   const mimeType = file?.metadata?.mimetype || file?.metadata?.mimeType || ''
 
-  return (
-    mimeType.startsWith('image/') ||
-    /\.(avif|bmp|gif|jpe?g|png|webp)$/i.test(name)
-  )
+  return mimeType.startsWith('image/') || /\.(avif|bmp|gif|jpe?g|png|webp)$/i.test(name)
 }
 
 async function getFirstImageFromProductFolder(productId) {

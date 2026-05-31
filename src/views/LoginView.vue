@@ -40,8 +40,8 @@ async function submitLogin() {
       password: password.value,
     })
 
-    successMessage.value = 'Login successful. Redirecting to home page.'
-    await router.push(route.query.redirect?.toString() || '/home')
+    successMessage.value = 'Login successful. Redirecting to dashboard.'
+    await router.push(route.query.redirect?.toString() || '/dashboard')
   } catch (error) {
     errorMessage.value = error.message || 'Unable to login. Please try again.'
   } finally {

@@ -106,13 +106,7 @@ onBeforeUnmount(() => {
         :rules="requiredRules"
       />
 
-      <v-alert
-        v-if="usernameWarning"
-        type="warning"
-        variant="tonal"
-        density="compact"
-        class="mb-4"
-      >
+      <v-alert v-if="usernameWarning" type="warning" variant="tonal" density="compact" class="mb-4">
         {{ usernameWarning }}
       </v-alert>
 

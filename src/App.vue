@@ -6,7 +6,7 @@ const route = useRoute()
 
 // Show navigation bar only on /home routes
 const showNavBar = () => {
-  return route.path.startsWith('/home')
+  return route.path.startsWith('/dashboard')
 }
 </script>
 
