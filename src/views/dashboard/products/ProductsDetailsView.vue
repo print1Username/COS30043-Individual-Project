@@ -1,15 +1,18 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import AppButton from '@/components/ui/AppButton.vue'
-import { getProductById, updateProduct } from '@/lib/products'
+import { deleteProduct, getProductById, updateProduct } from '@/lib/products'
 
 const route = useRoute()
+const router = useRouter()
 
 const product = ref(null)
 const loading = ref(false)
 const saving = ref(false)
+const deleting = ref(false)
 const editing = ref(false)
+const deleteDialog = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
 const fileInput = ref(null)
@@ -44,6 +47,9 @@ const productTypes = [
 const imageCount = computed(() => existingImages.value.length + newImages.value.length)
 const canAddImages = computed(() => editing.value && imageCount.value < 10)
 const productId = computed(() => route.params.id)
+const deleteButtonLabel = computed(() => {
+  return `Delete`
+})
 
 function formatDate(value) {
   if (!value) return 'Not available'
@@ -220,8 +226,37 @@ async function saveProduct() {
   }
 }
 
+function openDeleteDialog() {
+  deleteDialog.value = true
+}
+
+function closeDeleteDialog() {
+  if (deleting.value) return
+  deleteDialog.value = false
+}
+
+async function confirmDelete() {
+  deleting.value = true
+  errorMessage.value = ''
+  successMessage.value = ''
+
+  try {
+    await deleteProduct(productId.value)
+    deleteDialog.value = false
+    editing.value = false
+    successMessage.value = 'Product deleted successfully.'
+    await router.push('/dashboard/products')
+  } catch (error) {
+    console.error('[products:details] delete error', error)
+    errorMessage.value = error?.message || 'Unable to delete product.'
+  } finally {
+    deleting.value = false
+  }
+}
+
 watch(productId, () => {
   editing.value = false
+  deleteDialog.value = false
   loadProduct()
 })
 
@@ -463,10 +498,20 @@ onBeforeUnmount(() => {
 
     <div v-if="product && editing" class="floating-actions">
       <v-btn
+        color="error"
+        variant="flat"
+        prepend-icon="mdi-delete"
+        :disabled="saving || deleting"
+        @click="openDeleteDialog"
+      >
+        {{ deleteButtonLabel }}
+      </v-btn>
+      <v-spacer />
+      <v-btn
         variant="text"
         color="white"
         prepend-icon="mdi-close"
-        :disabled="saving"
+        :disabled="saving || deleting"
         @click="cancelEditing"
       >
         Cancel
@@ -476,11 +521,33 @@ onBeforeUnmount(() => {
         variant="flat"
         prepend-icon="mdi-content-save"
         :loading="saving"
+        :disabled="deleting"
         @click="saveProduct"
       >
         Save
       </v-btn>
     </div>
+
+    <v-dialog v-model="deleteDialog" max-width="520">
+      <v-card class="delete-dialog">
+        <v-card-title class="text-h6 font-weight-bold">Delete product?</v-card-title>
+        <v-card-text>
+          <p class="mb-3">
+            This will permanently remove <strong>{{ product?.name }}</strong> from the products
+            table.
+          </p>
+          <p class="text-body-2 text-medium-emphasis">
+            The database trigger will also record this action in the history table.
+          </p>
+        </v-card-text>
+        <v-card-actions class="justify-end ga-2">
+          <v-btn variant="text" :disabled="deleting" @click="closeDeleteDialog">Cancel</v-btn>
+          <v-btn color="error" variant="flat" :loading="deleting" @click="confirmDelete">
+            Delete
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <v-dialog v-model="previewImage" max-width="860">
       <v-card class="preview-card">
@@ -659,6 +726,13 @@ onBeforeUnmount(() => {
   box-shadow: 0 16px 42px rgba(0, 0, 0, 0.42);
 }
 
+.delete-dialog {
+  overflow: hidden;
+  border: 1px solid rgba(66, 184, 131, 0.18);
+  background: #0d1511;
+  color: #e7f8ee;
+}
+
 .preview-card {
   overflow: hidden;
   border-radius: 8px;
@@ -690,6 +764,7 @@ onBeforeUnmount(() => {
     bottom: 14px;
     left: 14px;
     justify-content: flex-end;
+    flex-wrap: wrap;
   }
 }
 </style>

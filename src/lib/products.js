@@ -334,3 +334,24 @@ export async function updateProduct({
     throw error
   }
 }
+
+export async function deleteProduct(id) {
+  if (!id) throw new Error('Product id is required.')
+
+  const userId = await getCurrentUserId()
+
+  const { data, error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('[products:delete] delete error', error)
+    throw error
+  }
+
+  return data
+}
