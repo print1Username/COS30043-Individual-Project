@@ -69,7 +69,7 @@ async function runSearch(q) {
 function submitSearch() {
   const q = query.value.trim()
   if (!q) return
-  router.replace({ path: '/dashboard/search', query: { q } })
+  router.replace({ path: '/home/search', query: { q } })
 }
 
 // Single source of truth: immediate watch covers both initial load and subsequent navigation
@@ -241,8 +241,8 @@ function formatPrice(value) {
                 class="result-card result-card--own"
                 role="button"
                 tabindex="0"
-                @click="$router.push(`/dashboard/products/${product.id}`)"
-                @keydown.enter.prevent="$router.push(`/dashboard/products/${product.id}`)"
+                @click="$router.push(`/home/products/${product.id}`)"
+                @keydown.enter.prevent="$router.push(`/home/products/${product.id}`)"
               >
                 <div class="result-image">
                   <v-img

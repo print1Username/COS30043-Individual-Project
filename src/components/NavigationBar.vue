@@ -11,22 +11,22 @@ const navItems = [
   {
     label: 'Dashboard',
     icon: 'mdi-view-dashboard',
-    to: '/dashboard',
+    to: '/home',
   },
   {
     label: 'Products',
     icon: 'mdi-package',
-    to: '/dashboard/products',
+    to: '/home/products',
   },
   {
     label: 'History',
     icon: 'mdi-history',
-    to: '/dashboard/history',
+    to: '/home/history',
   },
   {
     label: 'Profile',
     icon: 'mdi-account-circle',
-    to: '/dashboard/profile',
+    to: '/home/profile',
   },
 ]
 
@@ -37,7 +37,7 @@ const isActive = (path) => {
 function submitSearch() {
   const q = searchQuery.value.trim()
   if (!q) return
-  router.push({ path: '/dashboard/search', query: { q } })
+  router.push({ path: '/home/search', query: { q } })
   searchQuery.value = ''
 }
 </script>

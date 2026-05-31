@@ -5,15 +5,14 @@ import SignUpView from '@/views/SignUpView.vue'
 import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/ResetPasswordView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import SearchPageView from '@/views/home/SearchPageView.vue'
 
-import SearchPageView from '@/views/dashboard/SearchPageView.vue'
-
-import DashboardView from '@/views/dashboard/HomeView.vue'
-import ProfileView from '@/views/dashboard/ProfileView.vue'
-import ProductsView from '@/views/dashboard/products/ProductsView.vue'
-import CreateProductView from '@/views/dashboard/products/CreateProductView.vue'
-import ProductsDetailsView from '@/views/dashboard/products/ProductsDetailsView.vue'
-import HistoryView from '@/views/dashboard/HistoryView.vue'
+import HomeView from '@/views/home/HomeView.vue'
+import ProfileView from '@/views/home/ProfileView.vue'
+import ProductsView from '@/views/home/products/ProductsView.vue'
+import CreateProductView from '@/views/home/products/CreateProductView.vue'
+import ProductsDetailsView from '@/views/home/products/ProductsDetailsView.vue'
+import HistoryView from '@/views/home/HistoryView.vue'
 import { exchangeCodeForSession, getCurrentSession } from '@/lib/auth'
 
 function getPasswordResetRequest() {
@@ -30,7 +29,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
+      name: 'landing',
       component: HomePage,
     },
     {
@@ -57,60 +56,46 @@ const router = createRouter({
       },
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: DashboardView,
-      meta: {
-        requiresAuth: true,
-      },
+      path: '/home',
+      name: 'home',
+      component: HomeView,
+      meta: { requiresAuth: true },
     },
     {
-      path: '/dashboard/products',
+      path: '/home/products',
       name: 'products',
       component: ProductsView,
-      meta: {
-        requiresAuth: true,
-      },
+      meta: { requiresAuth: true },
     },
     {
-      path: '/dashboard/products/create',
+      path: '/home/products/create',
       name: 'products-create',
       component: CreateProductView,
-      meta: {
-        requiresAuth: true,
-      },
+      meta: { requiresAuth: true },
     },
     {
-      path: '/dashboard/products/:id',
+      path: '/home/products/:id',
       name: 'products-details',
       component: ProductsDetailsView,
-      meta: {
-        requiresAuth: true,
-      },
+      meta: { requiresAuth: true },
     },
     {
-      path: '/dashboard/history',
+      path: '/home/history',
       name: 'history',
       component: HistoryView,
-      meta: {
-        requiresAuth: true,
-      },
+      meta: { requiresAuth: true },
     },
     {
-      path: '/dashboard/profile',
+      path: '/home/profile',
       name: 'profile',
       component: ProfileView,
-      meta: {
-        requiresAuth: true,
-      },
+      meta: { requiresAuth: true },
     },
     {
-      path: '/dashboard/search',
+      path: '/home/search',
       name: 'search',
       component: SearchPageView,
-      meta: {
-        requiresAuth: true,
-      },
+      meta: { requiresAuth: true },
     },
     {
       path: '/:pathMatch(.*)*',
@@ -121,7 +106,6 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  // Preserve Supabase email redirect exchange first
   if (to.query.code) {
     await exchangeCodeForSession(window.location.href)
     return {
@@ -134,45 +118,32 @@ router.beforeEach(async (to) => {
     }
   }
 
-  // Preserve reset-request guard
   if (to.meta.requiresResetRequest) {
     const resetRequest = getPasswordResetRequest()
-
     if (!resetRequest || resetRequest.expiresAt < Date.now()) {
       localStorage.removeItem('passwordResetRequested')
       console.info('[auth:failed] Reset page blocked: no recent forgot-password request')
-
-      return {
-        path: '/forgot',
-      }
+      return { path: '/forgot' }
     }
-
     return true
   }
 
-  // Determine session state
   let session = null
   try {
     session = await getCurrentSession()
-  } catch (err) {
+  } catch {
     session = null
   }
 
-  // Define auth-only pages (login-related)
   const authPages = ['/login', '/signup', '/forgot', '/reset']
 
   if (session) {
-    // If logged in and trying to access auth pages, redirect to dashboard
     if (authPages.includes(to.path)) {
-      return { path: '/dashboard', replace: true }
+      return { path: '/home', replace: true }
     }
-
-    // Allow all other pages (including `/` home)
     return true
   }
 
-  // No session: allow public pages (including home and auth pages),
-  // but block pages that explicitly require auth
   if (to.meta && to.meta.requiresAuth) {
     return {
       path: '/login',
