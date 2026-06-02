@@ -5,28 +5,28 @@ const actions = [
     description: 'Create a new product',
     icon: 'mdi-plus-circle-outline',
     color: '#42b883',
-    to: '/home/products/create',
+    to: '/dashboard/products/create',
   },
   {
     label: 'My Products',
     description: 'Browse your catalogue',
     icon: 'mdi-package-variant',
     color: '#64b5f6',
-    to: '/home/products',
+    to: '/dashboard/products',
   },
   {
     label: 'History',
     description: 'View activity logs',
     icon: 'mdi-history',
     color: '#ffb01f',
-    to: '/home/history',
+    to: '/dashboard/history',
   },
   {
     label: 'Profile',
     description: 'Manage your account',
     icon: 'mdi-account-circle-outline',
     color: '#ce93d8',
-    to: '/home/profile',
+    to: '/dashboard/profile',
   },
 ]
 </script>

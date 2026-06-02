@@ -54,7 +54,7 @@ onMounted(load)
         <h2 class="recent-title">Recent Products</h2>
       </div>
       <v-btn
-        to="/home/search"
+        to="/dashboard/search"
         variant="tonal"
         color="primary"
         size="small"
