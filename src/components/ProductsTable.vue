@@ -16,6 +16,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showCreator: {
+    type: Boolean,
+    default: false,
+  },
+  currentUserId: {
+    type: String,
+    default: null,
+  },
 })
 
 const isGrid = computed(() => props.mode === 'grid')
@@ -107,6 +115,11 @@ function openProduct(product) {
           <p class="product-description">
             {{ product.descriptions || 'No description provided.' }}
           </p>
+
+          <div class="product-creator" v-if="showCreator && product.creator_username">
+            <v-icon icon="mdi-account-outline" size="14" />
+            <span>{{ product.creator_username }}</span>
+          </div>
 
           <div class="product-meta">
             <span>
@@ -231,6 +244,19 @@ function openProduct(product) {
 .products-list .product-description {
   -webkit-line-clamp: 1;
   line-clamp: 1;
+}
+
+.product-creator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #8ba89d;
+}
+
+.product-creator :deep(.v-icon) {
+  color: #42b883;
 }
 
 .product-meta {

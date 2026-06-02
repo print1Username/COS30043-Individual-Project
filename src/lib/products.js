@@ -47,7 +47,7 @@ function getPublicProductImageUrl(path) {
   return data?.publicUrl || ''
 }
 
-async function getCurrentUserId() {
+export async function getCurrentUserId() {
   const { data, error } = await supabase.auth.getSession()
 
   if (error) {
@@ -233,6 +233,26 @@ export async function createProduct(payload = {}, files = []) {
   return normalizeProduct(insertData)
 }
 
+async function getUserInfo(userId) {
+  if (!userId) return { username: 'Unknown' }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('username, display_name')
+    .eq('user_id', userId)
+    .single()
+
+  if (error) {
+    console.warn('[products:user] get user info error', error)
+    return { username: 'Unknown' }
+  }
+
+  return {
+    username: data?.username || 'Unknown',
+    display_name: data?.display_name || '',
+  }
+}
+
 export async function getProducts({ page = 1, perPage = 10 } = {}) {
   const safePage = Math.max(Number(page) || 1, 1)
   const safePerPage = Math.max(Number(perPage) || 10, 1)
@@ -242,6 +262,42 @@ export async function getProducts({ page = 1, perPage = 10 } = {}) {
   const { data, error, count } = await supabase
     .from('products')
     .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(from, to)
+
+  if (error) throw error
+
+  const products = await Promise.all((data || []).map(normalizeProduct))
+
+  // Add creator info to each product
+  const withCreators = await Promise.all(
+    products.map(async (product) => {
+      const userInfo = await getUserInfo(product.user_id)
+      return {
+        ...product,
+        creator_username: userInfo.username,
+        creator_display_name: userInfo.display_name,
+      }
+    }),
+  )
+
+  return {
+    products: withCreators,
+    total: count || 0,
+  }
+}
+
+export async function getMyProducts({ page = 1, perPage = 10 } = {}) {
+  const userId = await getCurrentUserId()
+  const safePage = Math.max(Number(page) || 1, 1)
+  const safePerPage = Math.max(Number(perPage) || 10, 1)
+  const from = (safePage - 1) * safePerPage
+  const to = from + safePerPage - 1
+
+  const { data, error, count } = await supabase
+    .from('products')
+    .select('*', { count: 'exact' })
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .range(from, to)
 
@@ -351,4 +407,18 @@ export async function deleteProduct(id) {
   }
 
   return data
+}
+
+export async function getAnyProductById(id) {
+  if (!id) throw new Error('Product id is required.')
+
+  const { data, error } = await supabase.from('products').select('*').eq('id', id).single()
+
+  if (error) throw error
+  return normalizeProduct(data)
+}
+
+export function isProductOwner(productUserId, currentUserId) {
+  if (!productUserId || !currentUserId) return false
+  return productUserId === currentUserId
 }

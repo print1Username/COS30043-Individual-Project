@@ -1,10 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { getRecentOtherProducts } from '@/lib/home'
 
 const products = ref([])
 const loading = ref(false)
 const error = ref('')
+const router = useRouter()
 
 function formatType(value) {
   if (!value) return 'Uncategorized'
@@ -28,6 +30,10 @@ function timeAgo(isoString) {
   if (hours < 24) return `${hours}h ago`
   const days = Math.floor(hours / 24)
   return `${days}d ago`
+}
+
+function openProduct(product) {
+  router.push(`/dashboard/products/${product.id}`)
 }
 
 async function load() {
@@ -79,7 +85,16 @@ onMounted(load)
     </div>
 
     <div v-else class="recent-list">
-      <article v-for="product in products" :key="product.id" class="recent-item">
+      <article
+        v-for="product in products"
+        :key="product.id"
+        class="recent-item"
+        role="button"
+        tabindex="0"
+        @click="openProduct(product)"
+        @keydown.enter.prevent="openProduct(product)"
+        @keydown.space.prevent="openProduct(product)"
+      >
         <div class="recent-image">
           <v-img
             v-if="product.image_url"
@@ -154,10 +169,13 @@ onMounted(load)
   padding: 10px 8px;
   border-radius: 8px;
   transition: background 0.15s;
+  cursor: pointer;
 }
 
-.recent-item:hover {
-  background: rgba(66, 184, 131, 0.06);
+.recent-item:hover,
+.recent-item:focus-visible {
+  background: rgba(66, 184, 131, 0.08);
+  outline: none;
 }
 
 .recent-image {

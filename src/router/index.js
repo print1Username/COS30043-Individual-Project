@@ -11,7 +11,7 @@ import DashboardView from '@/views/dashboard/DashboardView.vue'
 import ProfileView from '@/views/dashboard/ProfileView.vue'
 import ProductsView from '@/views/dashboard/products/ProductsView.vue'
 import CreateProductView from '@/views/dashboard/products/CreateProductView.vue'
-import ProductsDetailsView from '@/views/dashboard/products/ProductsDetailsView.vue'
+import ProductDetailsWrapper from '@/views/dashboard/products/ProductDetailsWrapper.vue'
 import HistoryView from '@/views/dashboard/HistoryView.vue'
 import { exchangeCodeForSession, getCurrentSession } from '@/lib/auth'
 
@@ -76,7 +76,7 @@ const router = createRouter({
     {
       path: '/dashboard/products/:id',
       name: 'products-details',
-      component: ProductsDetailsView,
+      component: ProductDetailsWrapper,
       meta: { requiresAuth: true },
     },
     {
