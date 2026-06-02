@@ -1,34 +1,41 @@
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'products_type') THEN
+    CREATE TYPE public.products_type AS ENUM (
+      'food_and_beverage',
+      'tools_and_equipment',
+      'furniture_and_home_goods',
+      'clothing_and_wearables',
+      'raw_materials',
+      'components_and_parts',
+      'structures',
+      'entertainment_and_hobby',
+      'medical_and_health',
+      'personal_care_and_cosmetics',
+      'containers_and_storage'
+    );
+  END IF;
+END
+$$;
+
 CREATE TABLE IF NOT EXISTS public.products (
-  id uuid NOT NULL default gen_random_uuid (),
-  user_id uuid not null default auth.uid (),
-  name text not null default 'Name'::text,
-  descriptions text null,
-  value smallint not null default '1'::smallint,
-  price numeric not null default '1'::numeric,
-  created_at timestamp with time zone not null default now(),
-  update_at timestamp with time zone not null default now(),
-  type public.products_type null,
-  product_image text null,
-  constraint products_pkey primary key (id)
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL DEFAULT auth.uid(),
+  name text NOT NULL DEFAULT 'Name'::text,
+  descriptions text NULL,
+  value smallint NOT NULL DEFAULT 1,
+  price numeric(12, 2) NOT NULL DEFAULT 1,
+  created_at timestamp WITH TIME ZONE NOT NULL DEFAULT now(),
+  update_at timestamp WITH TIME ZONE NOT NULL DEFAULT now(),
+  type public.products_type NULL,
+  product_image text NULL,
+  CONSTRAINT products_pkey PRIMARY KEY (id)
 ) TABLESPACE pg_default;
 
--- Create enum type for item categories
+ALTER TABLE public.products
+  ALTER COLUMN price TYPE numeric(12, 2) USING ROUND(price::numeric, 2),
+  ALTER COLUMN price SET DEFAULT 1;
 
-CREATE TYPE IF NOT EXISTS products_type AS ENUM (
-  'food_and_beverage',
-  'tools_and_equipment',
-  'furniture_and_home_goods',
-  'clothing_and_wearables',
-  'raw_materials',
-  'components_and_parts',
-  'structures',
-  'entertainment_and_hobby',
-  'medical_and_health',
-  'personal_care_and_cosmetics',
-  'containers_and_storage'
-);
-
--- Enable row-level security and rebuild product policies.
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Insert own products" ON public.products;
@@ -43,8 +50,6 @@ CREATE POLICY "Insert own products"
   TO authenticated
   WITH CHECK (user_id = auth.uid());
 
--- Allow any authenticated user to SELECT any product row.
--- This enables cross-user search. Write operations remain owner-only.
 CREATE POLICY "Select all products"
   ON public.products
   FOR SELECT
@@ -64,8 +69,6 @@ CREATE POLICY "Delete own products"
   TO authenticated
   USING (user_id = auth.uid());
 
--- Storage bucket and policies for product images.
--- Uploaded paths are stored as: {product_id}/{timestamp}_{index}_{filename}
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('products', 'products', true)
 ON CONFLICT (id) DO NOTHING;
@@ -89,10 +92,10 @@ CREATE POLICY "Insert own product images"
       SELECT 1
       FROM public.products
       WHERE products.id::text IN (
-          (storage.foldername(name))[1],
-          (storage.foldername(name))[2]
-        )
-        AND products.user_id = auth.uid()
+        (storage.foldername(name))[1],
+        (storage.foldername(name))[2]
+      )
+      AND products.user_id = auth.uid()
     )
   );
 
@@ -106,10 +109,10 @@ CREATE POLICY "Select own product images"
       SELECT 1
       FROM public.products
       WHERE products.id::text IN (
-          (storage.foldername(name))[1],
-          (storage.foldername(name))[2]
-        )
-        AND products.user_id = auth.uid()
+        (storage.foldername(name))[1],
+        (storage.foldername(name))[2]
+      )
+      AND products.user_id = auth.uid()
     )
   );
 
@@ -123,10 +126,10 @@ CREATE POLICY "Update own product images"
       SELECT 1
       FROM public.products
       WHERE products.id::text IN (
-          (storage.foldername(name))[1],
-          (storage.foldername(name))[2]
-        )
-        AND products.user_id = auth.uid()
+        (storage.foldername(name))[1],
+        (storage.foldername(name))[2]
+      )
+      AND products.user_id = auth.uid()
     )
   )
   WITH CHECK (
@@ -135,10 +138,10 @@ CREATE POLICY "Update own product images"
       SELECT 1
       FROM public.products
       WHERE products.id::text IN (
-          (storage.foldername(name))[1],
-          (storage.foldername(name))[2]
-        )
-        AND products.user_id = auth.uid()
+        (storage.foldername(name))[1],
+        (storage.foldername(name))[2]
+      )
+      AND products.user_id = auth.uid()
     )
   );
 
@@ -152,9 +155,9 @@ CREATE POLICY "Delete own product images"
       SELECT 1
       FROM public.products
       WHERE products.id::text IN (
-          (storage.foldername(name))[1],
-          (storage.foldername(name))[2]
-        )
-        AND products.user_id = auth.uid()
+        (storage.foldername(name))[1],
+        (storage.foldername(name))[2]
+      )
+      AND products.user_id = auth.uid()
     )
   );

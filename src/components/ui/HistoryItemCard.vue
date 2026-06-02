@@ -30,8 +30,8 @@ const typeConfig = {
   success: {
     icon: 'mdi-check-circle-outline',
     color: '#4caf50',
-    title: 'Operation Completed',
-    description: 'Inventory operation was successfully executed.',
+    title: 'Trade Completed',
+    description: 'Successful trade record was stored for both users.',
   },
   delete: {
     icon: 'mdi-delete-outline',
@@ -80,6 +80,10 @@ function formatDate(isoString) {
   } catch {
     return isoString
   }
+}
+
+function formatPrice(value) {
+  return `RM ${Number(value || 0).toFixed(2)}`
 }
 
 const typeDetails = computed(() => getTypeDetails(props.item?.history_type))
@@ -156,6 +160,29 @@ function handleToggle() {
               </p>
             </div>
           </v-col>
+
+          <template v-if="item.history_type === 'success'">
+            <v-col cols="12" md="4">
+              <div class="detail-box">
+                <span class="detail-label">Quantity</span>
+                <p class="detail-value">{{ item.quantity || 0 }} pc</p>
+              </div>
+            </v-col>
+
+            <v-col cols="12" md="4">
+              <div class="detail-box">
+                <span class="detail-label">Unit Price</span>
+                <p class="detail-value">{{ formatPrice(item.unit_price) }}</p>
+              </div>
+            </v-col>
+
+            <v-col cols="12" md="4">
+              <div class="detail-box">
+                <span class="detail-label">Total Price</span>
+                <p class="detail-value">{{ formatPrice(item.total_price) }}</p>
+              </div>
+            </v-col>
+          </template>
         </v-row>
       </div>
     </v-expand-transition>

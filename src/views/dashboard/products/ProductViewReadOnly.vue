@@ -1,16 +1,20 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import AppButton from '@/components/ui/AppButton.vue'
 import ImageGallery from '@/components/ImageGallery.vue'
+import TradeModal from '@/components/TradeModal.vue'
 import { getAnyProductById } from '@/lib/products'
+import { createTrade } from '@/lib/trades'
 
 const route = useRoute()
-const router = useRouter()
 
 const product = ref(null)
 const loading = ref(false)
+const trading = ref(false)
+const tradeDialog = ref(false)
 const errorMessage = ref('')
+const successMessage = ref('')
 
 const productTypes = [
   { label: 'Food & Beverage', value: 'food_and_beverage' },
@@ -60,6 +64,41 @@ async function loadProduct() {
   }
 }
 
+function openTradeDialog() {
+  errorMessage.value = ''
+  successMessage.value = ''
+  tradeDialog.value = true
+}
+
+function cancelTrade() {
+  tradeDialog.value = false
+}
+
+async function confirmTrade(quantity) {
+  if (!product.value) return
+
+  trading.value = true
+  errorMessage.value = ''
+  successMessage.value = ''
+
+  try {
+    await createTrade({
+      productId: product.value.id,
+      sellerId: product.value.user_id,
+      quantity,
+      unitPrice: product.value.price,
+    })
+    tradeDialog.value = false
+    successMessage.value = 'Trade completed successfully.'
+    await loadProduct()
+  } catch (error) {
+    console.error('[products:view:trade] trade error', error)
+    errorMessage.value = error?.message || 'Unable to complete this trade.'
+  } finally {
+    trading.value = false
+  }
+}
+
 onMounted(() => {
   loadProduct()
 })
@@ -89,6 +128,9 @@ onMounted(() => {
 
       <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">
         {{ errorMessage }}
+      </v-alert>
+      <v-alert v-if="successMessage" type="success" variant="tonal" class="mb-4">
+        {{ successMessage }}
       </v-alert>
 
       <v-skeleton-loader v-if="loading" type="image, article, actions" class="view-loader" />
@@ -151,10 +193,39 @@ onMounted(() => {
                 <p class="info-date">{{ formatDate(product.update_at) }}</p>
               </div>
             </div>
+
+            <div class="trade-section">
+              <v-alert v-if="Number(product.value || 0) < 1" type="warning" variant="tonal">
+                This product is out of stock.
+              </v-alert>
+              <v-btn
+                v-else
+                color="primary"
+                variant="flat"
+                size="large"
+                rounded="md"
+                prepend-icon="mdi-handshake-outline"
+                :loading="trading"
+                @click="openTradeDialog"
+              >
+                Trade
+              </v-btn>
+            </div>
           </div>
         </section>
       </div>
     </section>
+
+    <TradeModal
+      v-if="product"
+      v-model="tradeDialog"
+      :product-name="product.name"
+      :available-quantity="Number(product.value || 0)"
+      :unit-price="product.price"
+      :loading="trading"
+      @confirm="confirmTrade"
+      @cancel="cancelTrade"
+    />
   </v-container>
 </template>
 
@@ -263,6 +334,15 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+}
+
+.trade-section {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.trade-section .v-btn {
+  width: 100%;
 }
 
 .info-item {

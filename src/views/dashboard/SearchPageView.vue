@@ -177,7 +177,15 @@ function formatPrice(value) {
               </p>
             </div>
             <div v-else class="results-grid">
-              <article v-for="product in otherProducts" :key="product.id" class="result-card">
+              <article
+                v-for="product in otherProducts"
+                :key="product.id"
+                class="result-card result-card--clickable"
+                role="button"
+                tabindex="0"
+                @click="$router.push(`/dashboard/products/${product.id}`)"
+                @keydown.enter.prevent="$router.push(`/dashboard/products/${product.id}`)"
+              >
                 <div class="result-image">
                   <v-img
                     v-if="product.image_url"
@@ -238,7 +246,7 @@ function formatPrice(value) {
               <article
                 v-for="product in ownProducts"
                 :key="product.id"
-                class="result-card result-card--own"
+                class="result-card result-card--clickable"
                 role="button"
                 tabindex="0"
                 @click="$router.push(`/dashboard/products/${product.id}`)"
@@ -359,12 +367,12 @@ function formatPrice(value) {
     transform 0.2s;
 }
 
-.result-card--own {
+.result-card--clickable {
   cursor: pointer;
 }
 
-.result-card--own:hover,
-.result-card--own:focus-visible {
+.result-card--clickable:hover,
+.result-card--clickable:focus-visible {
   border-color: rgba(66, 184, 131, 0.5);
   transform: translateY(-2px);
   outline: none;

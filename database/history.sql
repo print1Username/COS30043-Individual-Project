@@ -1,4 +1,3 @@
--- Create enum type if it does not exist
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'history_type') THEN
@@ -7,52 +6,88 @@ BEGIN
 END
 $$;
 
--- Create table if it does not exist
+ALTER TYPE public.history_type ADD VALUE IF NOT EXISTS 'success';
+
 CREATE TABLE IF NOT EXISTS public.history (
-  id uuid not null default gen_random_uuid (),
-  user_id uuid not null default auth.uid (),
-  name text null,
-  history_type public.history_type not null default 'add'::history_type,
-  created_at timestamp with time zone not null default now(),
-  constraint history_pkey primary key (id)
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL DEFAULT auth.uid(),
+  name text NULL,
+  history_type public.history_type NOT NULL DEFAULT 'add'::history_type,
+  created_at timestamp WITH TIME ZONE NOT NULL DEFAULT now(),
+  CONSTRAINT history_pkey PRIMARY KEY (id)
 ) TABLESPACE pg_default;
 
 ALTER TABLE public.history
-ADD COLUMN IF NOT EXISTS name text;
+  ADD COLUMN IF NOT EXISTS name text,
+  ADD COLUMN IF NOT EXISTS trade_id uuid NULL,
+  ADD COLUMN IF NOT EXISTS product_id uuid NULL,
+  ADD COLUMN IF NOT EXISTS quantity smallint NULL,
+  ADD COLUMN IF NOT EXISTS unit_price numeric(12, 2) NULL,
+  ADD COLUMN IF NOT EXISTS total_price numeric(12, 2) NULL;
 
--- Enable Row Level Security (RLS) on history
+DO $$
+BEGIN
+  IF to_regclass('public.trades') IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'history_trade_id_fkey'
+      AND conrelid = 'public.history'::regclass
+  ) THEN
+    ALTER TABLE public.history
+      ADD CONSTRAINT history_trade_id_fkey
+      FOREIGN KEY (trade_id)
+      REFERENCES public.trades (id)
+      ON DELETE SET NULL;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'history_product_id_fkey'
+      AND conrelid = 'public.history'::regclass
+  ) THEN
+    ALTER TABLE public.history
+      ADD CONSTRAINT history_product_id_fkey
+      FOREIGN KEY (product_id)
+      REFERENCES public.products (id)
+      ON DELETE SET NULL;
+  END IF;
+END
+$$;
+
 ALTER TABLE public.history ENABLE ROW LEVEL SECURITY;
 
--- Drop existing policies if any
 DROP POLICY IF EXISTS "Select own history" ON public.history;
 DROP POLICY IF EXISTS "Insert own history" ON public.history;
 
--- Create SELECT policy: Users can only see their own history records
 CREATE POLICY "Select own history"
   ON public.history
   FOR SELECT
   TO authenticated
   USING (user_id = auth.uid());
 
--- Create INSERT policy: Users can insert their own history records
 CREATE POLICY "Insert own history"
   ON public.history
   FOR INSERT
   TO authenticated
   WITH CHECK (user_id = auth.uid());
 
--- Note: No UPDATE or DELETE policies are created, which implicitly prevents
--- authenticated and anonymous users from modifying or deleting history records.
-
--- Trigger function to automatically log changes from products to history
 CREATE OR REPLACE FUNCTION public.sync_product_to_history()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 BEGIN
   IF (TG_OP = 'INSERT') THEN
     INSERT INTO public.history (user_id, name, history_type)
     VALUES (NEW.user_id, NEW.name, 'add');
     RETURN NEW;
   ELSIF (TG_OP = 'UPDATE') THEN
+    IF current_setting('app.skip_product_history', true) = 'true' THEN
+      RETURN NEW;
+    END IF;
+
     INSERT INTO public.history (user_id, name, history_type)
     VALUES (NEW.user_id, NEW.name, 'modify');
     RETURN NEW;
@@ -64,12 +99,10 @@ BEGIN
 
   RETURN NULL;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
--- Drop trigger if it already exists on products table
 DROP TRIGGER IF EXISTS trigger_sync_product_to_history ON public.products;
 
--- Create AFTER trigger to sync insert, update, delete operations on products
 CREATE TRIGGER trigger_sync_product_to_history
 AFTER INSERT OR UPDATE OR DELETE ON public.products
 FOR EACH ROW

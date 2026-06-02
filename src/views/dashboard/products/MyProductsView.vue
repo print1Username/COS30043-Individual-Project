@@ -164,6 +164,7 @@ onMounted(() => {
 }
 
 .my-products-summary {
+  padding-block: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
