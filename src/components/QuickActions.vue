@@ -43,7 +43,6 @@ const actions = [
         :to="action.to"
         variant="tonal"
         class="action-btn"
-        height="72"
       >
         <div class="action-inner">
           <v-icon :icon="action.icon" :color="action.color" size="28" class="mb-1" />
@@ -69,7 +68,6 @@ const actions = [
 }
 
 .actions-grid {
-  padding: 10px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
@@ -78,13 +76,13 @@ const actions = [
 @media (max-width: 960px) {
   .actions-grid {
     grid-template-columns: repeat(2, 1fr);
+    padding-bottom: 60px;
   }
 }
 
-@media (max-width: 600px) {
-  .actions-grid {
-    grid-template-columns: 1fr;
-  }
+.action-btn {
+  min-height: 110px;
+  padding: 0 !important;
 }
 
 .action-btn {
@@ -94,7 +92,9 @@ const actions = [
   transition:
     border-color 0.2s,
     transform 0.15s;
-  padding: 50px !important;
+
+  min-height: 110px;
+  padding: 0 !important;
 }
 
 .action-btn:hover {
