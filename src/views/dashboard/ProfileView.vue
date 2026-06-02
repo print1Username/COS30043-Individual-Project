@@ -390,11 +390,30 @@ onBeforeUnmount(() => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+@media (max-width: 600px) {
+  .profile-timestamps {
+    grid-template-columns: 1fr;
+  }
+}
+
 .timestamp-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
   color: #a8b5aa;
+}
+
+@media (max-width: 600px) {
+  .timestamp-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .timestamp-value {
+    text-align: right;
+  }
 }
 
 .timestamp-label {

@@ -191,19 +191,35 @@ onMounted(() => {
     padding: 92px 18px 32px;
   }
 
-  .products-header,
-  .products-actions,
-  .products-summary {
-    align-items: stretch;
+  .products-header {
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .products-summary {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .products-actions {
     width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
   }
 
   .view-toggle {
-    align-self: flex-start;
+    flex-shrink: 0;
+  }
+
+  .products-actions :deep(.v-btn) {
+    min-height: 48px;
+  }
+
+  .products-actions :deep(.app-button) {
+    margin-left: 0 !important;
   }
 }
 </style>
