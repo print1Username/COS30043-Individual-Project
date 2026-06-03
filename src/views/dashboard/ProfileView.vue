@@ -249,7 +249,7 @@ onBeforeUnmount(() => {
       </p>
     </section>
 
-    <v-row class="profile-grid" align="start" justify="center" dense>
+    <v-row class="profile-grid ma-12 px-10" align="start" justify="center" dense>
       <v-col cols="12" md="4">
         <v-card class="avatar-card pa-6 elevation-6">
           <div class="avatar-preview-wrapper">
