@@ -240,17 +240,26 @@ export async function createProduct(payload = {}, files = []) {
 }
 
 async function getUserInfo(userId) {
-  if (!userId) return { username: 'Unknown' }
+  if (!userId) {
+    return {
+      username: 'Unknown',
+      display_name: '',
+    }
+  }
 
   const { data, error } = await supabase
     .from('profiles')
     .select('username, display_name')
-    .eq('user_id', userId)
-    .single()
+    .eq('id', userId)
+    .maybeSingle()
 
   if (error) {
     console.warn('[products:user] get user info error', error)
-    return { username: 'Unknown' }
+
+    return {
+      username: 'Unknown',
+      display_name: '',
+    }
   }
 
   return {
