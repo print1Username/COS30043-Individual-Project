@@ -70,7 +70,7 @@ function normalizeImagePath(product, path) {
   const cleanPath = removeBucketPrefix(path)
   if (cleanPath.includes('/')) return cleanPath
 
-  return `${product.id}/${cleanPath}`
+  return `${product.user_id}/${product.id}/${cleanPath}`
 }
 
 function isImageFile(file) {
@@ -80,10 +80,12 @@ function isImageFile(file) {
   return mimeType.startsWith('image/') || /\.(avif|bmp|gif|jpe?g|png|webp)$/i.test(name)
 }
 
-async function getFirstImageFromProductFolder(productId) {
+async function getFirstImageFromProductFolder(userId, productId) {
   if (!productId) return ''
 
-  const { data, error } = await supabase.storage.from('products').list(productId, {
+  const folder = `${userId}/${productId}`
+
+  const { data, error } = await supabase.storage.from('products').list(folder, {
     limit: 100,
     sortBy: {
       column: 'name',
@@ -99,7 +101,8 @@ async function getFirstImageFromProductFolder(productId) {
   const firstFile = (data || []).find(
     (item) => item.name && !item.name.endsWith('/') && isImageFile(item),
   )
-  return firstFile ? `${productId}/${firstFile.name}` : ''
+
+  return firstFile ? `${userId}/${productId}/${firstFile.name}` : ''
 }
 
 async function getProductImageUrl(path) {
@@ -127,7 +130,8 @@ export async function normalizeProduct(product) {
     normalizeImagePath(product, path),
   )
   const firstImagePath = imagePaths[0] || ''
-  const folderImagePath = firstImagePath || (await getFirstImageFromProductFolder(product.id))
+  const folderImagePath =
+    firstImagePath || (await getFirstImageFromProductFolder(product.user_id, product.id))
   const fullImagePaths = folderImagePath
     ? [folderImagePath, ...imagePaths.filter((path) => path && path !== folderImagePath)]
     : imagePaths
@@ -149,7 +153,9 @@ export async function uploadImages(userId, productId, files = []) {
 
   for (let i = 0; i < files.length && i < 10; i++) {
     const file = files[i]
-    const path = `${productId}/${Date.now()}_${i}_${file.name}`
+    const extension = file.name.split('.').pop()
+    const filename = `${crypto.randomUUID()}.${extension}`
+    const path = `${userId}/${productId}/${filename}`
 
     const { error } = await supabase.storage.from('products').upload(path, file, {
       cacheControl: '3600',
@@ -393,6 +399,26 @@ export async function deleteProduct(id) {
 
   const userId = await getCurrentUserId()
 
+  const folder = `${userId}/${id}`
+
+  const { data: files, error: listError } = await supabase.storage.from('products').list(folder)
+
+  if (listError) {
+    console.error('[products:delete] list images error', listError)
+    throw listError
+  }
+
+  if (files?.length) {
+    const paths = files.filter((file) => file.name).map((file) => `${folder}/${file.name}`)
+
+    const { error: removeError } = await supabase.storage.from('products').remove(paths)
+
+    if (removeError) {
+      console.error('[products:delete] remove images error', removeError)
+      throw removeError
+    }
+  }
+
   const { data, error } = await supabase
     .from('products')
     .delete()
@@ -402,7 +428,7 @@ export async function deleteProduct(id) {
     .single()
 
   if (error) {
-    console.error('[products:delete] delete error', error)
+    console.error('[products:delete] delete product error', error)
     throw error
   }
 
