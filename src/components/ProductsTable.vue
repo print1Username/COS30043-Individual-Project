@@ -116,9 +116,14 @@ function openProduct(product) {
             {{ product.descriptions || 'No description provided.' }}
           </p>
 
-          <div class="product-creator" v-if="showCreator && product.creator_username">
+          <div
+            v-if="showCreator && (product.creator_display_name || product.creator_username)"
+            class="product-creator"
+          >
             <v-icon icon="mdi-account-outline" size="14" />
-            <span>{{ product.creator_username }}</span>
+            <span>
+              {{ product.creator_display_name || product.creator_username }}
+            </span>
           </div>
 
           <div class="product-meta">

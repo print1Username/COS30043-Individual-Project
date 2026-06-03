@@ -264,7 +264,7 @@ async function getUserInfo(userId) {
 
   return {
     username: data?.username || 'Unknown',
-    display_name: data?.display_name || '',
+    display_name: data?.display_name || data?.username || 'Unknown',
   }
 }
 
