@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import ProductsSearchView from './ProductsSearchView.vue'
-import MyProductsView from './MyProductsView.vue'
+import ProductsSearchView from '@/views/dashboard/products/ProductsSearchView.vue'
+import MyProductsView from '@/views/dashboard/products/MyProductsView.vue'
 
 const activeTab = ref('all')
 </script>
@@ -14,7 +14,7 @@ const activeTab = ref('all')
         <v-tabs v-model="activeTab" color="primary" class="tabs-header">
           <v-tab value="all" class="tab-item">
             <v-icon icon="mdi-store-outline" class="me-2" />
-            All Products
+            Marketplace
           </v-tab>
           <v-tab value="my" class="tab-item">
             <v-icon icon="mdi-folder-outline" class="me-2" />
