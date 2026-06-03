@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import AppButton from '@/components/ui/AppButton.vue'
 import Pagination from '@/components/ui/Pagination.vue'
 import ProductsTable from '@/components/ProductsTable.vue'
 import { getProducts, getCurrentUserId } from '@/lib/products'
