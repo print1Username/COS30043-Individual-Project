@@ -431,6 +431,7 @@ onBeforeUnmount(() => {
 
 .profile-grid {
   margin-inline: 100px;
+  margin-block: 30px;
 }
 
 @media (max-width: 960px) {
