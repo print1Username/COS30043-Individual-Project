@@ -7,11 +7,10 @@ import NavigationBar from '@/components/NavigationBar.vue'
 import NavigationBarMobile from '@/components/NavigationBarMobile.vue'
 
 const route = useRoute()
-
 const { mdAndDown } = useDisplay()
 
 const showNavBar = computed(() => {
-  return route.path.startsWith('/dashboard')
+  return route.path.startsWith('/dashboard') && route.name !== 'not-found'
 })
 </script>
 
